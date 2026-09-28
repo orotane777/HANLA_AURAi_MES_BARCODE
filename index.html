@@ -529,12 +529,19 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   }
 
   /* 키보드가 올라오면 보이는 영역(visualViewport)에 앱 높이를 맞춘다.
-     그러면 아래에 붙은 시트가 키보드 바로 위로 올라오고, 시간 줄은 그 위 남은 공간에 남는다. */
+     아래에 붙은 시트는 키보드 바로 위로 따라 올라간다. 다만 시트 맨 위가 화면 꼭대기(여백 8px)에
+     닿으면 더 올라가지 않고, 넘치는 아랫부분은 키보드 뒤로 내려가 가려진다. */
   var vv = window.visualViewport;
+  var SHEET_TOP_GAP = 8;
   function fitViewport() {
     if (vv) { app.style.top = vv.offsetTop + 'px'; app.style.height = vv.height + 'px'; }
     var sh = app.querySelector('.sheet');
-    app.style.setProperty('--sheetH', sh ? sh.offsetHeight + 'px' : '0px');
+    if (!sh) { app.style.setProperty('--sheetH', '0px'); return; }
+    sh.style.bottom = '0px';
+    var appH = app.getBoundingClientRect().height, h = sh.offsetHeight;
+    var drop = Math.min(0, appH - SHEET_TOP_GAP - h);
+    sh.style.bottom = drop + 'px';
+    app.style.setProperty('--sheetH', (h + drop) + 'px');
   }
   if (vv) { vv.addEventListener('resize', fitViewport); vv.addEventListener('scroll', fitViewport); }
   function focusMemo() {
@@ -558,7 +565,7 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
       case 'torch': S.torch = !S.torch; applyTorch(); render(); break;
       case 'memo':
         if (S.sheet === 'memo') { S.sheet = null; render(); break; }
-        S.sheet = 'memo'; S.menu = false; S.memo = S.run && S.run.memo ? S.run.memo : ''; render(); focusMemo(); break;
+        S.sheet = 'memo'; S.menu = false; S.memo = S.run && S.run.memo ? S.run.memo : ''; render(); break;
       case 'mode': S.mode = v; render(); break;
       case 'demoScan': scanned(CODES[S.demoIdx++ % CODES.length]); break;
       case 'closeScanner': if (S.run) { S.screen = 'running'; render(); } break;
@@ -573,7 +580,6 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
         if (mta) {
           mta.value = v;
           app.querySelectorAll('.chips button').forEach(function (cb) { cb.classList.toggle('sel', cb.dataset.v === v); });
-          focusMemo();
         } else render();
         break;
       case 'saveMemo': if (document.activeElement) document.activeElement.blur(); if (S.run) { S.run.memo = S.memo.trim(); save(); } S.sheet = null; toast('메모를 저장했어요'); break;
