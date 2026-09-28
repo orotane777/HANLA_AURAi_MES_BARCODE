@@ -18,7 +18,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-l
 
 #cam,#scene{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 #scene{background:radial-gradient(ellipse 55% 30% at 28% 30%,rgba(150,140,120,.55),transparent 70%),radial-gradient(ellipse 45% 35% at 78% 55%,rgba(80,100,120,.6),transparent 70%),radial-gradient(ellipse 90% 30% at 50% 92%,rgba(90,80,70,.7),transparent 70%),linear-gradient(180deg,#33373c,#202326 45%,#2d2824)}
-#app{position:fixed;inset:0;z-index:1;--bottom:calc(env(safe-area-inset-bottom,0px) + max(28px,8vh))}
+#app{position:fixed;left:0;right:0;top:0;height:100%;z-index:1;--bottom:calc(env(safe-area-inset-bottom,0px) + max(28px,8vh))}
 
 .hdr{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:16px;right:16px;display:flex;justify-content:space-between;z-index:12}
 .cbtn{width:48px;height:48px;border-radius:50%;border:1px solid var(--lineSoft);background:var(--bg);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
@@ -120,9 +120,13 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-l
 .cat.armed label{color:var(--accent);font-weight:800}
 .cat.running label{color:var(--dimLabel);font-weight:800}
 
-.sheetWrap{position:absolute;inset:0;z-index:20}
-.sheetWrap .scrim{position:absolute;inset:0;border:0;background:var(--scrim)}
-.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88dvh;overflow-y:auto;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 24px);border-radius:26px 26px 0 0;background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.sheetWrap{position:absolute;inset:0}
+.sheetWrap .scrim{position:absolute;inset:0;border:0;background:var(--scrim);z-index:20}
+.center.memoMode{top:calc(env(safe-area-inset-top,0px) + 64px);bottom:calc(var(--sheetH,0px) + 8px);z-index:21}
+.memoMode .ctl,.memoMode .memoLine{display:none}
+.memoMode .runHead .h{font-size:24px}
+.memoMode .timer{font-size:48px;margin-top:6px}
+.sheet{z-index:22;position:absolute;left:0;right:0;bottom:0;max-height:88dvh;overflow-y:auto;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 24px);border-radius:26px 26px 0 0;background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
 .grab{align-self:center;width:40px;height:4px;border-radius:2px;background:var(--line);flex-shrink:0}
 .sheet.split{max-height:88vh;max-height:88dvh;overflow:hidden;padding-bottom:0;gap:10px}
 .sheetHead{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -131,7 +135,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-l
 .sheet h3{margin:0;font-size:20px;font-weight:800}
 .opt{height:60px;border-radius:30px;border:1px solid var(--line);background:var(--surface2);font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
 .ghost{height:52px;border:0;background:transparent;color:var(--muted);font-size:15px;font-weight:700;flex-shrink:0}
-textarea{height:112px;resize:none;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--surface2);color:var(--text);font-family:inherit;font-size:16px;line-height:1.5;outline:none;flex-shrink:0}
+textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--surface2);color:var(--text);font-family:inherit;font-size:16px;line-height:1.5;outline:none;flex-shrink:0}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips button{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);font-size:14px;font-weight:700}
 .chips button.sel{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}
@@ -489,7 +493,7 @@ textarea{height:112px;resize:none;padding:14px;border-radius:18px;border:1px sol
     if (S.notice === 'lunch' && S.lastJob) {
       h += '<div class="notice"><span class="ic">' + I.clock + '</span><div class="tx"><b>점심시간에 자동 종료됐어요</b><span>' + esc(S.lastJob.ship ? S.lastJob.ship + ' · ' + S.lastJob.item : S.lastJob.item) + '</span></div><button class="pill" data-act="resume">이어서 하기</button></div>';
     }
-    h += '<div class="center' + (S.notice ? ' withNotice' : '') + (S.screen === 'rearm' ? ' rearm' : '') + '">';
+    h += '<div class="center' + (S.notice ? ' withNotice' : '') + (S.screen === 'rearm' ? ' rearm' : '') + (S.sheet === 'memo' ? ' memoMode' : '') + '">';
     if (sc) {
       if (S.screen === 'rearm' && S.run) h += '<div class="strip above"><span class="dot"></span><span class="t">' + esc(runTitle()) + '</span><span class="n num" data-timer>' + fmt(elapsed()) + '</span><button class="stripX" data-act="closeScanner" aria-label="스캐너 닫기">' + I.close + '</button></div>';
       h += '<div class="modes above"><button class="mode' + (S.mode === 'barcode' ? ' sel' : '') + '" data-act="mode" data-v="barcode" aria-label="바코드">' + I.barcode + '</button><button class="mode' + (S.mode === 'qr' ? ' sel' : '') + '" data-act="mode" data-v="qr" aria-label="QR">' + I.qr + '</button></div>';
@@ -521,7 +525,26 @@ textarea{height:112px;resize:none;padding:14px;border-radius:18px;border:1px sol
     var ta = document.getElementById('memo');
     if (ta) ta.addEventListener('input', function () { S.memo = ta.value; var sel = app.querySelectorAll('.chips button'); sel.forEach(function (b) { b.classList.toggle('sel', S.memo.trim() === b.dataset.v); }); });
     syncCamera();
+    fitViewport();
   }
+
+  /* 키보드가 올라오면 보이는 영역(visualViewport)에 앱 높이를 맞춘다.
+     그러면 아래에 붙은 시트가 키보드 바로 위로 올라오고, 시간 줄은 그 위 남은 공간에 남는다. */
+  var vv = window.visualViewport;
+  function fitViewport() {
+    if (vv) { app.style.top = vv.offsetTop + 'px'; app.style.height = vv.height + 'px'; }
+    var sh = app.querySelector('.sheet');
+    app.style.setProperty('--sheetH', sh ? sh.offsetHeight + 'px' : '0px');
+  }
+  if (vv) { vv.addEventListener('resize', fitViewport); vv.addEventListener('scroll', fitViewport); }
+  function focusMemo() {
+    var ta = document.getElementById('memo');
+    if (!ta) return;
+    ta.focus({ preventScroll: true });
+    try { ta.setSelectionRange(ta.value.length, ta.value.length); } catch (e) {}
+  }
+  /* 빠른 입력 버튼을 눌러도 입력칸에서 커서가 빠지지 않게 해서 키보드가 깜빡이지 않게 한다 */
+  app.addEventListener('mousedown', function (e) { if (e.target.closest('.chips button')) e.preventDefault(); });
 
   /* ---------- events ---------- */
   app.addEventListener('click', function (e) {
@@ -535,7 +558,7 @@ textarea{height:112px;resize:none;padding:14px;border-radius:18px;border:1px sol
       case 'torch': S.torch = !S.torch; applyTorch(); render(); break;
       case 'memo':
         if (S.sheet === 'memo') { S.sheet = null; render(); break; }
-        S.sheet = 'memo'; S.menu = false; S.memo = S.run && S.run.memo ? S.run.memo : ''; render(); break;
+        S.sheet = 'memo'; S.menu = false; S.memo = S.run && S.run.memo ? S.run.memo : ''; render(); focusMemo(); break;
       case 'mode': S.mode = v; render(); break;
       case 'demoScan': scanned(CODES[S.demoIdx++ % CODES.length]); break;
       case 'closeScanner': if (S.run) { S.screen = 'running'; render(); } break;
@@ -544,8 +567,16 @@ textarea{height:112px;resize:none;padding:14px;border-radius:18px;border:1px sol
       case 'detail': S.sheet = 'detail'; S.menu = false; render(); break;
       case 'closeSheet': S.sheet = null; render(); break;
       case 'nonprod': startRun({ cat: 'nonprod', item: v, ship: null, req: null, orders: [] }); break;
-      case 'chip': S.memo = v; render(); break;
-      case 'saveMemo': if (S.run) { S.run.memo = S.memo.trim(); save(); } S.sheet = null; toast('메모를 저장했어요'); break;
+      case 'chip':
+        S.memo = v;
+        var mta = document.getElementById('memo');
+        if (mta) {
+          mta.value = v;
+          app.querySelectorAll('.chips button').forEach(function (cb) { cb.classList.toggle('sel', cb.dataset.v === v); });
+          focusMemo();
+        } else render();
+        break;
+      case 'saveMemo': if (document.activeElement) document.activeElement.blur(); if (S.run) { S.run.memo = S.memo.trim(); save(); } S.sheet = null; toast('메모를 저장했어요'); break;
       case 'resume': if (S.lastJob) startRun(S.lastJob); break;
     }
   });
