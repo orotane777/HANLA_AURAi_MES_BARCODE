@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>현장 작업기록 데모</title>
+<style>
+@font-face{font-family:SUIT;src:url(https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2) format("woff2");font-weight:100 900;font-display:swap}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);font-family:SUIT,Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+button{font-family:inherit;color:inherit;-webkit-appearance:none;appearance:none}
+textarea{-webkit-user-select:text;user-select:text}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.num{font-variant-numeric:tabular-nums}
+
+#cam,#scene{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#scene{background:radial-gradient(ellipse 55% 30% at 28% 30%,rgba(150,140,120,.55),transparent 70%),radial-gradient(ellipse 45% 35% at 78% 55%,rgba(80,100,120,.6),transparent 70%),radial-gradient(ellipse 90% 30% at 50% 92%,rgba(90,80,70,.7),transparent 70%),linear-gradient(180deg,#33373c,#202326 45%,#2d2824)}
+#app{position:fixed;inset:0;z-index:1;--bottom:calc(env(safe-area-inset-bottom,0px) + max(28px,8vh))}
+
+.hdr{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:16px;right:16px;display:flex;justify-content:space-between;z-index:12}
+.cbtn{width:48px;height:48px;border-radius:50%;border:1px solid var(--lineSoft);background:var(--bg);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.cbtn.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+.cbtn.ring{border-color:var(--accent)}
+.cbtn.dimmed{opacity:.3;pointer-events:none}
+.hdr.top{z-index:25}
+
+.menuScrim{position:absolute;inset:0;border:0;background:var(--menuScrim);z-index:10}
+.menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 70px);left:16px;width:232px;padding:8px;border-radius:22px;background:var(--surface);border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:4px;z-index:11}
+.mi{height:56px;border-radius:16px;border:0;background:transparent;font-size:15px;font-weight:700;text-align:left;padding:0 10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.mi .ic{width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mi small{font-size:12px;font-weight:600;color:var(--muted)}
+.mi:disabled{color:var(--menuFg);cursor:not-allowed}
+.mi:disabled .ic{opacity:.6}
+
+.page{position:absolute;inset:0;z-index:30;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:24px;overflow-y:auto}
+.pageHead{display:flex;align-items:center;gap:14px}
+.pageHead h2{margin:0;font-size:20px;font-weight:800}
+.sec{display:flex;flex-direction:column;gap:10px}
+.sec .lb{font-size:13px;font-weight:700;color:var(--muted);padding:0 4px}
+.themeOpt{height:68px;border-radius:34px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:14px;padding:0 20px 0 12px;font-size:16px;font-weight:700;cursor:pointer}
+.themeOpt.sel{border:2px solid var(--accent)}
+.themeOpt .sw{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
+.themeOpt .sw i{width:18px;height:18px;border-radius:50%}
+.themeOpt .radio{margin-left:auto;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center}
+.themeOpt.sel .radio{border-color:var(--accent)}
+.themeOpt.sel .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+
+.notice{position:absolute;top:calc(env(safe-area-inset-top,0px) + 72px);left:16px;right:16px;padding:10px 8px 10px 10px;border-radius:20px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;gap:12px;z-index:6}
+.notice .ic{width:40px;height:40px;flex-shrink:0;border-radius:50%;background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.notice .tx{flex:1;min-width:0}
+.notice b{display:block;font-size:14px}
+.notice span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{height:44px;padding:0 16px;flex-shrink:0;border-radius:22px;border:0;background:var(--accent);color:var(--onAccent);font-size:13px;font-weight:800;white-space:nowrap}
+
+.center{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 76px);bottom:calc(var(--bottom) + 138px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:2}
+.center.withNotice{top:calc(env(safe-area-inset-top,0px) + 136px)}
+.above{position:relative;z-index:1}
+.strip{width:min(300px,84vw);padding:12px 16px;border-radius:26px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.strip .dot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.strip .t{flex:1;min-width:0;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip .n{flex-shrink:0;font-size:18px;font-weight:800;color:var(--dimLabel)}
+.modes{display:flex;gap:14px}
+.mode{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
+.mode.sel{border:3px solid var(--accent);color:var(--text)}
+
+.vf{position:relative;z-index:0;display:block;width:min(320px,86vw);height:112px;border-radius:18px;border:1px solid var(--camLine);background:transparent;box-shadow:0 0 0 200vmax var(--dimColor);padding:0;overflow:hidden;transition:width .25s,height .25s}
+.vf.qr{width:min(300px,78vw);height:min(300px,78vw);border-radius:24px}
+.vf.ok{border-color:var(--accent)}
+.vf .c{position:absolute;width:24px;height:24px;border:0 solid var(--corner)}
+.vf.qr .c{width:36px;height:36px}
+.vf .tl{top:12px;left:12px;border-top-width:3px;border-left-width:3px;border-top-left-radius:9px}
+.vf .tr{top:12px;right:12px;border-top-width:3px;border-right-width:3px;border-top-right-radius:9px}
+.vf .bl{bottom:12px;left:12px;border-bottom-width:3px;border-left-width:3px;border-bottom-left-radius:9px}
+.vf .br{bottom:12px;right:12px;border-bottom-width:3px;border-right-width:3px;border-bottom-right-radius:9px}
+.vf .line{position:absolute;left:24px;right:24px;height:2px;border-radius:2px;background:var(--accent);box-shadow:0 0 14px 3px var(--glow);animation:sweep 1.6s ease-in-out infinite alternate}
+@keyframes sweep{from{top:12%}to{top:84%}}
+@media (prefers-reduced-motion:reduce){.vf .line{animation:none;top:48%}}
+.vf .flash{position:absolute;inset:0;background:var(--glowSoft)}
+.vf .check{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 36px var(--glow)}
+.vf.qr .check{width:88px;height:88px;margin:-44px 0 0 -44px}
+.vf .guide{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);white-space:nowrap;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.14);color:#E9ECEF;font-size:12px;font-weight:600}
+.vf.qr .guide{bottom:20px}
+.vf .guide.err{border-color:#FF8A6B;color:#FF8A6B}
+
+.run{display:flex;flex-direction:column;align-items:center;width:100%}
+.runBox{display:inline-flex;flex-direction:column;align-items:stretch;max-width:92vw}
+.runHead{display:flex;align-items:baseline;gap:12px;width:100%;min-width:0;contain:inline-size}
+.runHead .h{flex-shrink:0;font-size:32px;font-weight:800;letter-spacing:-.01em;line-height:1.15;white-space:nowrap}
+.runHead .s{min-width:0;font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{flex-shrink:0;align-self:center;padding:3px 9px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:12px;font-weight:700}
+.timer{margin-top:10px;font-size:clamp(52px,18vw,72px);font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--accent);text-shadow:0 0 26px var(--glow);white-space:nowrap}
+.ctl{display:flex;gap:28px;margin-top:40px}
+.ctl button{width:64px;height:64px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;padding:0}
+.memoLine{margin-top:22px;max-width:300px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.memoLine span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.toast{position:absolute;left:16px;right:16px;bottom:calc(var(--bottom) + 146px);height:52px;padding:0 18px;border-radius:26px;background:var(--surface2);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:5}
+
+.cats{position:absolute;left:0;right:0;bottom:var(--bottom);display:flex;justify-content:center;gap:22px;z-index:4}
+.cat{width:96px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.cat .well{height:96px;display:flex;align-items:center;justify-content:center}
+.cat button{width:60px;height:60px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;transition:all .25s ease}
+.cat button svg{width:24px;height:24px}
+.cat label{font-size:13px;font-weight:600;color:var(--muted)}
+.cat.armed button{width:84px;height:84px;background:var(--accent);color:var(--onAccent);box-shadow:0 0 0 6px var(--glowSoft),0 0 32px var(--glow)}
+.cat.running button{width:84px;height:84px;background:var(--dim);color:var(--onDim);box-shadow:none}
+.cat.armed button svg,.cat.running button svg{width:34px;height:34px}
+.cat.armed label{color:var(--accent);font-weight:800}
+.cat.running label{color:var(--dimLabel);font-weight:800}
+
+.sheetWrap{position:absolute;inset:0;z-index:20}
+.sheetWrap .scrim{position:absolute;inset:0;border:0;background:var(--scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88dvh;overflow-y:auto;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 24px);border-radius:26px 26px 0 0;background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.grab{align-self:center;width:40px;height:4px;border-radius:2px;background:var(--line);flex-shrink:0}
+.sheet h3{margin:0;font-size:20px;font-weight:800}
+.opt{height:60px;border-radius:30px;border:1px solid var(--line);background:var(--surface2);font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
+.ghost{height:52px;border:0;background:transparent;color:var(--muted);font-size:15px;font-weight:700;flex-shrink:0}
+textarea{height:112px;resize:none;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--surface2);color:var(--text);font-family:inherit;font-size:16px;line-height:1.5;outline:none;flex-shrink:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);font-size:14px;font-weight:700}
+.chips button.sel{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}
+.row2{display:flex;gap:10px;flex-shrink:0}
+.row2 button{height:56px;border-radius:28px;font-size:16px;font-weight:700}
+.btnOut{flex:1;border:1px solid var(--line);background:var(--surface)}
+.btnFill{flex:2;border:0;background:var(--accent);color:var(--onAccent);font-weight:800!important}
+.kv{border:1px solid var(--line);border-radius:18px;overflow:hidden;flex-shrink:0}
+.kv div{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;font-size:14px;border-bottom:1px solid var(--line)}
+.kv div:last-child{border-bottom:0}
+.kv span:first-child{color:var(--muted);flex-shrink:0}
+.kv span:last-child{font-weight:700;text-align:right}
+.orders{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.orders .cap{font-size:13px;font-weight:700;color:var(--muted)}
+.order{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:16px;border:1px solid var(--line)}
+.order .l{flex:1;min-width:0;display:flex;flex-direction:column}
+.order .l b{font-size:14px}
+.order .l span{font-size:12px;color:var(--muted)}
+.order .q{font-size:13px;font-weight:700}
+.memoBox{display:flex;gap:8px;font-size:14px;padding:12px 16px;border-radius:16px;background:var(--surface2);flex-shrink:0}
+.memoBox span:first-child{color:var(--muted);flex-shrink:0}
+.day{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:18px;background:var(--surface2);flex-shrink:0}
+.day .top{display:flex;justify-content:space-between;align-items:baseline}
+.day .top b{font-size:14px}
+.day .top span{font-size:13px;color:var(--muted)}
+.barWrap{position:relative}
+.barWrap.over{padding-bottom:16px}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)}
+.bar i{display:block;height:100%}
+.mark{position:absolute;top:-4px;width:2px;height:22px;margin-left:-1px;border-radius:1px;background:var(--text)}
+.markTx{position:absolute;top:20px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--muted)}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;font-size:13px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend i{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend span{color:var(--muted)}
+.legend b{margin-left:auto}
+.full{height:56px;border-radius:28px;border:1px solid var(--line);background:var(--surface);font-size:16px;font-weight:700;flex-shrink:0}
+</style>
+</head>
+<body>
+<video id="cam" playsinline muted autoplay hidden></video>
+<div id="scene" hidden></div>
+<div id="app"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- palettes ---------- */
+  var PAL = {
+    dark: {bg:'#0A0C0E', bgRgb:'10,12,14', surface:'#15181C', surface2:'#1E2228', line:'#2C313A', lineSoft:'#262A31', text:'#EEF0F3', muted:'#8F98A5', accent:'#FFD000', onAccent:'#0A0C0E', dim:'#9C8000', onDim:'#0A0C0E', dimLabel:'#C2A01A', glow:'rgba(255,208,0,.38)', glowSoft:'rgba(255,208,0,.14)', camLine:'rgba(255,255,255,.22)', scrim:'rgba(0,0,0,.6)', menuScrim:'rgba(0,0,0,.35)', seg2:'#F08A3C', seg3:'#7C8CFF', menuFg:'#6E7682', corner:'#F2F4F6'},
+    light: {bg:'#F2F3EF', bgRgb:'242,243,239', surface:'#FFFFFF', surface2:'#E8EAE5', line:'#D2D6CF', lineSoft:'#DADDD6', text:'#14171A', muted:'#5A6169', accent:'#1F4FE0', onAccent:'#FFFFFF', dim:'#AFC0F3', onDim:'#163BA8', dimLabel:'#2E55C9', glow:'rgba(31,79,224,.28)', glowSoft:'rgba(31,79,224,.12)', camLine:'rgba(255,255,255,.5)', scrim:'rgba(16,19,22,.42)', menuScrim:'rgba(16,19,22,.18)', seg2:'#E07B1F', seg3:'#9B59D0', menuFg:'#8A9098', corner:'#F2F4F6'}
+  };
+  var params = new URLSearchParams(location.search);
+  var DIM = 0.9;
+  var root = document.documentElement;
+  var themeMeta = document.createElement('meta'); themeMeta.name = 'theme-color'; document.head.appendChild(themeMeta);
+  var theme = 'light';
+  try { theme = localStorage.getItem('worklog-theme') || theme; } catch (e) {}
+  if (params.get('theme') === 'dark' || params.get('theme') === 'light') theme = params.get('theme');
+  function applyTheme(name) {
+    theme = PAL[name] ? name : 'light';
+    var P = PAL[theme];
+    Object.keys(P).forEach(function (k) { root.style.setProperty('--' + k, P[k]); });
+    root.style.setProperty('--dimColor', 'rgba(' + P.bgRgb + ',' + DIM + ')');
+    themeMeta.content = P.bg;
+    try { localStorage.setItem('worklog-theme', theme); } catch (e) {}
+  }
+  applyTheme(theme);
+
+  /* ---------- demo data ---------- */
+  var JOBS = {
+    '202609280042': { ship: 'H2861', item: 'Automation assembly', req: '202609280042', orders: [ { no: '202609280117', item: 'Automation assembly', qty: '1 EA' } ] },
+    '202609280051': { ship: 'H2874', item: 'Local control cabinet', req: '202609280051', orders: [ { no: '202609280131', item: 'No.1 Local control cabinet', qty: '1 EA' }, { no: '202609280132', item: 'No.2 Local control cabinet', qty: '1 EA' }, { no: '202609280133', item: 'No.3 Local control cabinet', qty: '1 EA' } ] },
+    '202609280063': { ship: 'H2890', item: 'Junction box', req: '202609280063', orders: [ { no: '202609280150', item: 'Junction box', qty: '2 EA' } ] }
+  };
+  var CODES = Object.keys(JOBS);
+  var CAT = { ship: '호선작업', support: '생산지원', nonprod: '생산외' };
+  var NONPROD = ['청소·정리', '조례·회의', '안전·직무교육', '설비 점검·수리'];
+  var CHIPS = ['자재 대기', '도면 확인', '재작업', '불량 발견'];
+  var HR = 3600, WORKDAY = 8 * HR;
+
+  /* ---------- icons ---------- */
+  var I = {
+    menu: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>',
+    close: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>',
+    torch: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M8 3h8v4l-2 3v10a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V10L8 7z"/><path d="M8 7h8"/><path d="M12 12v2"/></svg>',
+    pencil: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>',
+    pencilSm: '<svg class="i" width="14" height="14" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/></svg>',
+    clock: '<svg class="i" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    stop: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>',
+    up: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>',
+    right: '<svg class="i" width="18" height="18" viewBox="0 0 24 24" style="opacity:.6"><path d="M9 6l6 6-6 6"/></svg>',
+    check: '<svg class="i" width="60%" height="60%" viewBox="0 0 24 24" style="stroke-width:2.6"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    barcode: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 5v14" stroke-width="2"/><path d="M7.5 5v14" stroke-width="1.2"/><path d="M10.5 5v14" stroke-width="2.4"/><path d="M14 5v14" stroke-width="1.2"/><path d="M16.8 5v14" stroke-width="2"/><path d="M20 5v14" stroke-width="1.2"/></svg>',
+    qr: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="2.8" y="2.8" width="7.4" height="7.4" rx="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="5" y="5" width="3" height="3" rx="1"/><rect x="13.8" y="2.8" width="7.4" height="7.4" rx="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="16" y="5" width="3" height="3" rx="1"/><rect x="2.8" y="13.8" width="7.4" height="7.4" rx="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="5" y="16" width="3" height="3" rx="1"/><rect x="11.2" y="2.6" width="1.6" height="3.8" rx=".8"/><rect x="11.2" y="7.8" width="1.6" height="1.6" rx=".8"/><rect x="2.6" y="11.2" width="3.8" height="1.6" rx=".8"/><rect x="7.8" y="11.2" width="3.6" height="1.6" rx=".8"/><rect x="11.2" y="11.2" width="1.6" height="4.2" rx=".8"/><rect x="14.2" y="11.2" width="1.6" height="1.6" rx=".8"/><rect x="17.4" y="11.2" width="4" height="1.6" rx=".8"/><rect x="11.2" y="17" width="1.6" height="4.4" rx=".8"/><rect x="14.2" y="14.4" width="1.6" height="1.6" rx=".8"/><rect x="16.6" y="16.6" width="4.8" height="4.8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="18.2" y="18.2" width="1.6" height="1.6" rx=".6"/><rect x="14.2" y="19.8" width="1.6" height="1.6" rx=".8"/></svg>',
+    support: '<svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.6-3.3 2.8-5.2 5.5-5.2s4.9 1.9 5.5 5.2"/><path d="M15.5 5.1a3.1 3.1 0 0 1 0 5.8"/><path d="M17.3 14.6c1.8.7 2.9 2.3 3.2 4.9"/></svg>',
+    ship: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8z"/><path d="M3.5 12l8.5 4.5 8.5-4.5"/><path d="M3.5 16l8.5 4.5 8.5-4.5"/></svg>',
+    nonprod: '<svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>',
+    user: '<svg class="i" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6"/></svg>',
+    dash: '<svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M5 20V12"/><path d="M12 20V5"/><path d="M19 20v-9"/></svg>',
+    gear: '<svg class="i" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+    back: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'
+  };
+
+  /* ---------- state ---------- */
+  var today = new Date().toDateString();
+  var S = { screen: 'ready', mode: 'barcode', armed: 'ship', run: null, sheet: null, page: null, notice: null, lastJob: null, toast: null, err: null, torch: false, menu: false, memo: '', pending: null, demoIdx: 0, tally: { ship: 0, support: 0, nonprod: 0 }, cam: 'idle' };
+  try {
+    var saved = JSON.parse(localStorage.getItem('worklog-demo') || 'null');
+    if (saved && saved.day === today) {
+      S.tally = saved.tally || S.tally;
+      if (saved.run) { S.run = saved.run; S.screen = 'running'; }
+    }
+  } catch (e) {}
+  function save() {
+    try { localStorage.setItem('worklog-demo', JSON.stringify({ day: today, tally: S.tally, run: S.run })); } catch (e) {}
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function fmt(sec) { sec = Math.max(0, Math.floor(sec)); return pad(Math.floor(sec / 3600)) + ':' + pad(Math.floor(sec % 3600 / 60)) + ':' + pad(sec % 60); }
+  function hm(ts) { var d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function hh(s) { return (s / 3600).toFixed(1) + 'h'; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function elapsed() { return S.run ? Math.max(0, (Date.now() - S.run.start) / 1000) : 0; }
+  function isScanner() { return S.screen === 'ready' || S.screen === 'rearm' || S.screen === 'success'; }
+  function runTitle() { return S.run ? (S.run.cat === 'nonprod' ? S.run.item : S.run.ship + '  ' + S.run.item) : ''; }
+
+  /* ---------- actions ---------- */
+  function closeRun(at) {
+    if (S.run) { S.tally[S.run.cat] += Math.max(0, ((at || Date.now()) - S.run.start) / 1000); }
+  }
+  var toastT = null;
+  function toast(text) {
+    clearTimeout(toastT); S.toast = text; render();
+    toastT = setTimeout(function () { S.toast = null; render(); }, 2200);
+  }
+  function startRun(next) {
+    closeRun();
+    S.run = Object.assign({}, next, { start: Date.now(), memo: '' });
+    S.screen = 'running'; S.sheet = null; S.pending = null; S.notice = null; S.err = null; S.menu = false;
+    save(); render();
+  }
+  function stop() {
+    closeRun(); S.run = null; S.screen = 'ready'; S.armed = 'ship'; S.sheet = null;
+    save(); toast('기록을 종료했어요');
+  }
+  var scanT = null;
+  function scanned(code) {
+    if (S.screen === 'success') return;
+    var job = JOBS[code];
+    if (!job) { flashErr('등록 안 된 바코드예요'); return; }
+    if (S.run && S.run.req === job.req && S.run.cat === S.armed) { S.screen = 'running'; render(); toast('이미 기록 중인 작업이에요'); return; }
+    S.screen = 'success'; S.pending = Object.assign({}, job, { cat: S.armed });
+    feedback(); render();
+    clearTimeout(scanT);
+    scanT = setTimeout(function () { var p = S.pending; if (p) startRun(p); }, 700);
+  }
+  var errT = null;
+  function flashErr(msg) {
+    clearTimeout(errT); S.err = msg; render();
+    errT = setTimeout(function () { S.err = null; render(); }, 2000);
+  }
+  function tapCat(cat) {
+    S.menu = false;
+    if (cat === 'nonprod') { S.sheet = 'nonprod'; render(); return; }
+    if (S.screen === 'success') return;
+    if (S.screen === 'running') { S.screen = 'rearm'; S.armed = cat; render(); return; }
+    if (S.screen === 'rearm' && S.armed === cat) { S.screen = 'running'; render(); return; }
+    S.armed = cat; render();
+  }
+
+  /* ---------- feedback: vibrate + beep ---------- */
+  var audio = null;
+  document.addEventListener('pointerdown', function () {
+    if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (audio && audio.state === 'suspended') audio.resume();
+  }, { passive: true });
+  function feedback() {
+    try { navigator.vibrate && navigator.vibrate(60); } catch (e) {}
+    try {
+      if (!audio) return;
+      var o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = 1800; o.type = 'sine';
+      g.gain.setValueAtTime(0.0001, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, audio.currentTime + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.12);
+      o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.13);
+    } catch (e) {}
+  }
+
+  /* ---------- camera + detection ---------- */
+  var video = document.getElementById('cam');
+  var scene = document.getElementById('scene');
+  var stream = null, detector = null, detecting = false, loopT = null, starting = false;
+  var FORMATS = ['code_128', 'code_39', 'ean_13', 'itf', 'qr_code'];
+
+  function getDetector() {
+    if (detector) return Promise.resolve(detector);
+    var nativeOk = Promise.resolve(false);
+    if ('BarcodeDetector' in window && window.BarcodeDetector.getSupportedFormats) {
+      nativeOk = window.BarcodeDetector.getSupportedFormats().then(function (f) { return f.indexOf('code_128') >= 0 && f.indexOf('qr_code') >= 0; }).catch(function () { return false; });
+    }
+    return nativeOk.then(function (ok) {
+      if (ok) { detector = new window.BarcodeDetector({ formats: FORMATS }); return detector; }
+      return import('https://cdn.jsdelivr.net/npm/barcode-detector@2/dist/es/pure.min.js').then(function (m) {
+        detector = new m.BarcodeDetector({ formats: FORMATS }); return detector;
+      });
+    });
+  }
+  function startCamera() {
+    if (stream || starting || S.cam === 'denied' || S.cam === 'none') return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { S.cam = 'none'; render(); return; }
+    starting = true;
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+      .then(function (s) {
+        starting = false;
+        if (!isScanner()) { s.getTracks().forEach(function (t) { t.stop(); }); return; }
+        stream = s; video.srcObject = s; video.hidden = false; scene.hidden = true;
+        return video.play().then(function () { S.cam = 'on'; applyTorch(); render(); loop(); });
+      })
+      .catch(function (e) {
+        starting = false;
+        S.cam = (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) ? 'denied' : 'none';
+        render();
+      });
+  }
+  function stopCamera() {
+    clearTimeout(loopT); loopT = null;
+    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+    video.srcObject = null; video.hidden = true;
+    if (S.cam === 'on') S.cam = 'idle';
+  }
+  function applyTorch() {
+    if (!stream) return;
+    var track = stream.getVideoTracks()[0];
+    var caps = track && track.getCapabilities ? track.getCapabilities() : {};
+    if (!caps.torch) { if (S.torch) { S.torch = false; toast('이 폰은 손전등을 켤 수 없어요'); } return; }
+    track.applyConstraints({ advanced: [{ torch: !!S.torch }] }).catch(function () {});
+  }
+  function loop() {
+    clearTimeout(loopT);
+    if (!stream) return;
+    loopT = setTimeout(function () {
+      if (!stream) return;
+      var ready = (S.screen === 'ready' || S.screen === 'rearm') && !S.sheet && !S.menu && !S.page && video.readyState >= 2;
+      if (!ready || detecting) { loop(); return; }
+      detecting = true;
+      getDetector().then(function (d) { return d.detect(video); }).then(function (codes) {
+        detecting = false;
+        var want = S.mode === 'qr' ? function (c) { return c.format === 'qr_code'; } : function (c) { return c.format !== 'qr_code'; };
+        var hit = (codes || []).filter(want)[0];
+        if (hit) scanned(String(hit.rawValue || '').trim());
+        loop();
+      }).catch(function () { detecting = false; loop(); });
+    }, 220);
+  }
+  function syncCamera() {
+    var want = isScanner() && !S.sheet && !S.page;
+    if (want) {
+      if (S.cam === 'denied' || S.cam === 'none') { scene.hidden = false; video.hidden = true; }
+      else if (!stream) { scene.hidden = false; startCamera(); }
+    } else {
+      stopCamera(); scene.hidden = true;
+    }
+  }
+
+  /* ---------- render ---------- */
+  var app = document.getElementById('app');
+  function catHtml(key, icon) {
+    var cls = '';
+    var armedCat = S.sheet === 'nonprod' ? 'nonprod' : (isScanner() ? S.armed : null);
+    var runCat = (!armedCat && S.screen === 'running' && S.run) ? S.run.cat : null;
+    if (key === armedCat) cls = ' armed'; else if (key === runCat) cls = ' running';
+    return '<div class="cat' + cls + '"><div class="well"><button data-act="cat" data-v="' + key + '" aria-label="' + CAT[key] + '">' + icon + '</button></div><label>' + CAT[key] + '</label></div>';
+  }
+  function guideText() {
+    if (S.err) return S.err;
+    if (S.screen === 'success') return '인식됐어요';
+    if (S.cam === 'denied') return '카메라 권한이 없어요';
+    if (S.cam === 'none') return '이 기기는 카메라를 쓸 수 없어요';
+    return S.mode === 'qr' ? 'QR을 사각틀에 맞춰 주세요' : '바코드를 사각틀에 맞춰 주세요';
+  }
+  function dayHtml() {
+    var segs = { ship: S.tally.ship, support: S.tally.support, nonprod: S.tally.nonprod };
+    if (S.run) segs[S.run.cat] += elapsed();
+    var sum = segs.ship + segs.support + segs.nonprod;
+    var over = sum > WORKDAY;
+    var scale = Math.max(WORKDAY, sum);
+    function pc(v) { return (v / scale * 100).toFixed(2); }
+    var label = over ? hh(sum) + ' · 잔업 ' + hh(sum - WORKDAY) : hh(sum) + ' / 8.0h';
+    return '<div class="day"><div class="top"><b>오늘 내 하루</b><span class="num">' + label + '</span></div>' +
+      '<div class="barWrap' + (over ? ' over' : '') + '"><div class="bar"><i style="width:' + pc(segs.ship) + '%;background:var(--accent)"></i><i style="width:' + pc(segs.support) + '%;background:var(--seg2)"></i><i style="width:' + pc(segs.nonprod) + '%;background:var(--seg3)"></i></div>' +
+      (over ? '<span class="mark" style="left:' + (WORKDAY / scale * 100).toFixed(2) + '%"></span><span class="markTx" style="left:' + (WORKDAY / scale * 100).toFixed(2) + '%">8h</span>' : '') + '</div>' +
+      '<div class="legend"><div><i style="background:var(--accent)"></i><span>호선작업</span><b class="num">' + hh(segs.ship) + '</b></div><div><i style="background:var(--seg2)"></i><span>생산지원</span><b class="num">' + hh(segs.support) + '</b></div><div><i style="background:var(--seg3)"></i><span>생산외</span><b class="num">' + hh(segs.nonprod) + '</b></div><div><i style="background:' + (over ? 'var(--text)' : 'var(--line)') + ';box-shadow:inset 0 0 0 1px var(--muted)"></i><span>' + (over ? '잔업' : '미설명') + '</span><b class="num">' + (over ? hh(sum - WORKDAY) : hh(WORKDAY - sum)) + '</b></div></div></div>';
+  }
+  function sheetHtml() {
+    var h = '<div class="sheetWrap"><button class="scrim" data-act="closeSheet" aria-label="닫기"></button><div class="sheet"><span class="grab"></span>';
+    if (S.sheet === 'nonprod') {
+      h += '<h3>생산외 업무</h3>' + NONPROD.map(function (l) { return '<button class="opt" data-act="nonprod" data-v="' + esc(l) + '"><span>' + esc(l) + '</span>' + I.right + '</button>'; }).join('') + '<button class="ghost" data-act="closeSheet">취소</button>';
+    } else if (S.sheet === 'memo') {
+      h += '<h3>메모</h3><textarea id="memo" aria-label="메모 내용">' + esc(S.memo) + '</textarea><div class="chips">' +
+        CHIPS.map(function (l) { return '<button class="' + (S.memo.trim() === l ? 'sel' : '') + '" data-act="chip" data-v="' + esc(l) + '">' + esc(l) + '</button>'; }).join('') +
+        '</div><div class="row2"><button class="btnOut" data-act="closeSheet">취소</button><button class="btnFill" data-act="saveMemo">저장</button></div>';
+    } else if (S.sheet === 'detail' && S.run) {
+      var r = S.run, n = r.orders ? r.orders.length : 0;
+      h += '<h3>상세</h3><div class="kv"><div><span>작업</span><span>' + esc(runTitle()) + '</span></div><div><span>요청번호</span><span class="num">' + esc(r.req || '없음') + '</span></div><div><span>분류</span><span>' + CAT[r.cat] + '</span></div><div><span>시작</span><span class="num">' + hm(r.start) + '</span></div></div>';
+      if (n) h += '<div class="orders"><div class="cap">작업지시 ' + n + '건</div>' + r.orders.map(function (o) { return '<div class="order"><div class="l"><b>' + esc(o.item) + '</b><span class="num">' + esc(o.no) + '</span></div><span class="q num">' + esc(o.qty) + '</span></div>'; }).join('') + '</div>';
+      if (r.memo) h += '<div class="memoBox"><span>메모</span><span>' + esc(r.memo) + '</span></div>';
+      h += dayHtml() + '<button class="full" data-act="closeSheet">닫기</button>';
+    }
+    return h + '</div></div>';
+  }
+  function render() {
+    var sc = isScanner();
+    var h = '';
+    var memoOpen = S.sheet === 'memo';
+    h += '<div class="hdr' + (memoOpen ? ' top' : '') + '"><button class="cbtn' + (S.menu ? ' ring' : '') + (memoOpen ? ' dimmed' : '') + '" data-act="menu" aria-label="메뉴">' + (S.menu ? I.close : I.menu) + '</button>';
+    if (sc) h += '<button class="cbtn' + (S.torch ? ' on' : '') + (S.menu ? ' dimmed' : '') + '" data-act="torch" aria-label="손전등">' + I.torch + '</button>';
+    else if (S.screen === 'running') h += '<button class="cbtn' + (memoOpen ? ' ring' : '') + (S.menu ? ' dimmed' : '') + '" data-act="memo" aria-label="메모">' + (memoOpen ? I.close : I.pencil) + '</button>';
+    h += '</div>';
+    if (S.menu) h += '<button class="menuScrim" data-act="menu" aria-label="메뉴 닫기"></button><div class="menu">' +
+      '<button class="mi" disabled><span class="ic">' + I.user + '</span>마이페이지 <small>(구현중)</small></button>' +
+      '<button class="mi" disabled><span class="ic">' + I.dash + '</span>대시보드 <small>(구현중)</small></button>' +
+      '<button class="mi" data-act="settings"><span class="ic">' + I.gear + '</span>설정</button></div>';
+    if (S.notice === 'lunch' && S.lastJob) {
+      h += '<div class="notice"><span class="ic">' + I.clock + '</span><div class="tx"><b>점심시간에 자동 종료됐어요</b><span>' + esc(S.lastJob.ship ? S.lastJob.ship + ' · ' + S.lastJob.item : S.lastJob.item) + '</span></div><button class="pill" data-act="resume">이어서 하기</button></div>';
+    }
+    h += '<div class="center' + (S.notice ? ' withNotice' : '') + '">';
+    if (sc) {
+      if (S.screen === 'rearm' && S.run) h += '<div class="strip above"><span class="dot"></span><span class="t">' + esc(runTitle()) + '</span><span class="n num" data-timer>' + fmt(elapsed()) + '</span></div>';
+      h += '<div class="modes above"><button class="mode' + (S.mode === 'barcode' ? ' sel' : '') + '" data-act="mode" data-v="barcode" aria-label="바코드">' + I.barcode + '</button><button class="mode' + (S.mode === 'qr' ? ' sel' : '') + '" data-act="mode" data-v="qr" aria-label="QR">' + I.qr + '</button></div>';
+      var ok = S.screen === 'success';
+      h += '<button class="vf' + (S.mode === 'qr' ? ' qr' : '') + (ok ? ' ok' : '') + '" data-act="demoScan" aria-label="스캔 창 (누르면 데모 스캔)" style="--corner:' + (ok ? 'var(--accent)' : (S.err ? '#FF8A6B' : '#F2F4F6')) + '">' +
+        '<span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>' +
+        (!ok && !S.err ? '<span class="line"></span>' : '') +
+        (ok ? '<span class="flash"></span><span class="check">' + I.check + '</span>' : '') +
+        '<span class="guide' + (S.err || S.cam === 'denied' || S.cam === 'none' ? ' err' : '') + '">' + esc(guideText()) + '</span></button>';
+      if (S.screen === 'rearm') h += '<button class="cbtn above" style="width:56px;height:56px" data-act="closeScanner" aria-label="스캐너 닫기">' + I.close + '</button>';
+    } else if (S.screen === 'running' && S.run) {
+      var r = S.run, n = r.orders ? r.orders.length : 0;
+      h += '<div class="run"><div class="runBox"><div class="runHead"><span class="h">' + esc(r.cat === 'nonprod' ? r.item : r.ship) + '</span><span class="s">' + esc(r.cat === 'nonprod' ? '' : r.item) + '</span>' + (n > 1 ? '<span class="chip">' + n + '건</span>' : '') + '</div><div class="timer num" data-timer>' + fmt(elapsed()) + '</div></div>' +
+        '<div class="ctl"><button data-act="stop" aria-label="종료">' + I.stop + '</button><button data-act="detail" aria-label="상세">' + I.up + '</button></div>' +
+        (r.memo ? '<div class="memoLine">' + I.pencilSm + '<span>' + esc(r.memo) + '</span></div>' : '') + '</div>';
+    }
+    h += '</div>';
+    if (S.toast) h += '<div class="toast">' + esc(S.toast) + '</div>';
+    h += '<div class="cats">' + catHtml('support', I.support) + catHtml('ship', I.ship) + catHtml('nonprod', I.nonprod) + '</div>';
+    if (S.sheet) h += sheetHtml();
+    if (S.page === 'settings') {
+      h += '<div class="page"><div class="pageHead"><button class="cbtn" data-act="closePage" aria-label="뒤로">' + I.back + '</button><h2>설정</h2></div>' +
+        '<div class="sec"><div class="lb">테마</div>' +
+        '<button class="themeOpt' + (theme === 'light' ? ' sel' : '') + '" data-act="theme" data-v="light"><span class="sw" style="background:#F2F3EF"><i style="background:#1F4FE0"></i></span>라이트<span class="radio"></span></button>' +
+        '<button class="themeOpt' + (theme === 'dark' ? ' sel' : '') + '" data-act="theme" data-v="dark"><span class="sw" style="background:#0A0C0E"><i style="background:#FFD000"></i></span>다크<span class="radio"></span></button>' +
+        '</div></div>';
+    }
+    app.innerHTML = h;
+    var ta = document.getElementById('memo');
+    if (ta) ta.addEventListener('input', function () { S.memo = ta.value; var sel = app.querySelectorAll('.chips button'); sel.forEach(function (b) { b.classList.toggle('sel', S.memo.trim() === b.dataset.v); }); });
+    syncCamera();
+  }
+
+  /* ---------- events ---------- */
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+    var a = b.dataset.act, v = b.dataset.v;
+    switch (a) {
+      case 'menu': S.menu = !S.menu; render(); break;
+      case 'settings': S.menu = false; S.page = 'settings'; render(); break;
+      case 'closePage': S.page = null; render(); break;
+      case 'theme': applyTheme(v); render(); break;
+      case 'torch': S.torch = !S.torch; applyTorch(); render(); break;
+      case 'memo':
+        if (S.sheet === 'memo') { S.sheet = null; render(); break; }
+        S.sheet = 'memo'; S.menu = false; S.memo = S.run && S.run.memo ? S.run.memo : ''; render(); break;
+      case 'mode': S.mode = v; render(); break;
+      case 'demoScan': scanned(CODES[S.demoIdx++ % CODES.length]); break;
+      case 'closeScanner': if (S.run) { S.screen = 'running'; render(); } break;
+      case 'cat': tapCat(v); break;
+      case 'stop': stop(); break;
+      case 'detail': S.sheet = 'detail'; S.menu = false; render(); break;
+      case 'closeSheet': S.sheet = null; render(); break;
+      case 'nonprod': startRun({ cat: 'nonprod', item: v, ship: null, req: null, orders: [] }); break;
+      case 'chip': S.memo = v; render(); break;
+      case 'saveMemo': if (S.run) { S.run.memo = S.memo.trim(); save(); } S.sheet = null; toast('메모를 저장했어요'); break;
+      case 'resume': if (S.lastJob) startRun(S.lastJob); break;
+    }
+  });
+
+  /* ---------- clock: timers + lunch auto-close (12:00) ---------- */
+  setInterval(function () {
+    if (S.run) {
+      var noon = new Date(); noon.setHours(12, 0, 0, 0);
+      var now = Date.now();
+      if (S.run.start < noon.getTime() && now >= noon.getTime() && now < noon.getTime() + HR) {
+        var job = Object.assign({}, S.run); delete job.start; delete job.memo;
+        closeRun(noon.getTime()); S.lastJob = job; S.run = null; S.notice = 'lunch'; S.screen = 'ready'; S.sheet = null;
+        save(); render(); return;
+      }
+    }
+    var t = fmt(elapsed());
+    app.querySelectorAll('[data-timer]').forEach(function (el) { el.textContent = t; });
+  }, 1000);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopCamera(); else render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
