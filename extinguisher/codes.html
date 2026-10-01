@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>소화기 테스트 코드</title>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+@font-face{font-family:SUIT;src:url(https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2) format("woff2");font-weight:100 900;font-display:swap}
+/* 인쇄용 한 장. 코드 크기는 mm로 고정해 실제 크기로 출력된다. */
+:root{--bg:#F2F3EF;--paper:#fff;--fg:#14171A;--sub:#5A6169;--line:#B8BDB5;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:SUIT,Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;padding:28px 16px 48px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{margin:0;font-size:22px;font-weight:800}
+.lead{margin:6px 0 0;font-size:14px;color:var(--sub);line-height:1.6}
+.set{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 18px;break-inside:avoid}
+.set h2{margin:0 0 12px;font-size:16px;font-weight:800}
+.set h2 span{font-weight:600;color:var(--sub);font-size:13px;margin-left:8px}
+.tags{display:flex;flex-wrap:wrap;gap:6mm;align-items:flex-end}
+.tag{border:1px dashed var(--line);padding:3mm;display:flex;flex-direction:column;align-items:center;gap:1.5mm;background:#fff}
+.tag svg{display:block}
+.tag .cap{font-size:9pt;color:var(--sub);font-variant-numeric:tabular-nums}
+@media print{
+  body{background:#fff;padding:0}
+  .lead,.no-print{display:none}
+  .set{border:0;padding:0 0 6mm}
+}
+</style>
+</head>
+<body>
+<main>
+<div>
+  <h1>소화기 테스트 코드</h1>
+  <p class="lead">PC에서 인쇄할 때 배율을 <b>100%(실제 크기)</b>로 두세요. 점선을 따라 잘라 소화기 충압계 바로 위에 붙입니다. 코드 안에 크기가 적혀 있어서(예: FE01-Q15 = QR 15mm) 저장된 파일 이름만 보고도 어느 스티커를 찍었는지 알 수 있습니다.</p>
+</div>
+<div id="sets"></div>
+</main>
+<script>
+var EXT = ['FE01', 'FE02'];
+var SIZES = [
+  { t: 'Q', mm: 30, label: 'QR 30mm' },
+  { t: 'Q', mm: 20, label: 'QR 20mm' },
+  { t: 'Q', mm: 15, label: 'QR 15mm' },
+  { t: 'B', mm: 50, label: '바코드 50mm' },
+  { t: 'B', mm: 35, label: '바코드 35mm' }
+];
+var root = document.getElementById('sets');
+root.style.display = 'flex'; root.style.flexDirection = 'column'; root.style.gap = '18px';
+var NS = 'http://www.w3.org/2000/svg';
+EXT.forEach(function (fe) {
+  var sec = document.createElement('section'); sec.className = 'set';
+  sec.innerHTML = '<h2>' + fe + '<span>소화기 1대에 하나씩 골라 붙여 시험</span></h2><div class="tags"></div>';
+  var tags = sec.querySelector('.tags');
+  SIZES.forEach(function (s) {
+    var val = fe + '-' + s.t + s.mm;
+    var tag = document.createElement('div'); tag.className = 'tag';
+    if (s.t === 'Q') {
+      var qr = qrcode(0, 'M'); qr.addData(val); qr.make();
+      tag.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+      var q = tag.querySelector('svg');
+      q.style.width = s.mm + 'mm'; q.style.height = s.mm + 'mm';
+    } else {
+      var b = document.createElementNS(NS, 'svg'); tag.appendChild(b);
+      JsBarcode(b, val, { format: 'CODE128', width: 2, height: 60, margin: 0, displayValue: false, background: '#ffffff', lineColor: '#000000' });
+      var w = parseFloat(b.getAttribute('width')), h = parseFloat(b.getAttribute('height'));
+      b.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      b.setAttribute('preserveAspectRatio', 'none');
+      b.removeAttribute('width'); b.removeAttribute('height');
+      b.style.width = s.mm + 'mm'; b.style.height = Math.round(s.mm * 0.28) + 'mm';
+    }
+    var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = val + ' · ' + s.label;
+    tag.appendChild(cap);
+    tags.appendChild(tag);
+  });
+  root.appendChild(sec);
+});
+</script>
+</body>
+</html>

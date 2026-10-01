@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>소화기 점검 촬영 테스트</title>
+<style>
+@font-face{font-family:SUIT;src:url(https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2) format("woff2");font-weight:100 900;font-display:swap}
+/* 카메라 화면이 주인공. 보이는 화면 = 저장되는 사진이 되도록 영상을 잘라내지 않고(contain) 보여준다. */
+:root{
+  --bg:#0E1113; --panel:#1A1F23; --line:#2C3338; --fg:#F2F4F5; --sub:#9AA3AA;
+  --ok:#3FCB7E; --accent:#FF6B3D;
+  --font:SUIT,Pretendard,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);overflow:hidden;-webkit-tap-highlight-color:transparent}
+.app{height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px}
+header h1{margin:0;font-size:17px;font-weight:800;flex:1}
+.icon{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--fg);display:grid;place-items:center;padding:0}
+.icon svg{width:22px;height:22px}
+.icon[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.stage{position:relative;flex:1;min-height:0;background:#000}
+video{width:100%;height:100%;object-fit:contain;display:block}
+.status{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:calc(100% - 32px);padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.62);font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status.hit{background:var(--ok);color:#06210F}
+.res{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--sub);background:rgba(0,0,0,.55);padding:4px 8px;border-radius:8px;font-variant-numeric:tabular-nums}
+.empty{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--sub);font-size:15px;line-height:1.6}
+.empty button{margin-top:14px}
+footer{padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;flex-direction:column;gap:10px}
+.label{font-size:12px;color:var(--sub);font-weight:700;letter-spacing:.02em}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px}
+.seg button{height:40px;border:0;border-radius:10px;background:transparent;color:var(--sub);font:700 14px var(--font)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px}
+.row small{color:var(--sub)}
+.switch{width:52px;height:30px;border-radius:999px;border:0;background:var(--line);position:relative;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--fg);transition:left .15s}
+.switch[aria-pressed="true"]{background:var(--ok)}
+.switch[aria-pressed="true"]::after{left:25px}
+.btn{height:52px;border-radius:14px;border:0;background:var(--fg);color:var(--bg);font:800 16px var(--font);padding:0 20px}
+.btn.ghost{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
+/* 저장 결과 */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;z-index:10}
+.sheet .card{width:100%;background:var(--panel);border-radius:20px 20px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;gap:14px;max-height:92%;overflow:auto}
+.sheet h2{margin:0;font-size:18px;font-weight:800}
+.sheet .code{font-size:14px;color:var(--sub);word-break:break-all}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.shot{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000;padding:0;color:var(--fg);text-align:left}
+.shot img{width:100%;aspect-ratio:3/4;object-fit:contain;display:block;background:#000}
+.shot div{padding:8px 10px;font-size:12px;line-height:1.45;background:var(--panel);word-break:break-all}
+.shot.fail{align-self:start}
+.shot b{font-size:13px}
+.shot .err{color:var(--accent)}
+.note{font-size:13px;color:var(--sub);line-height:1.5}
+.viewer{position:fixed;inset:0;background:#000;z-index:20;overflow:auto}
+.viewer img{display:block;width:100%}
+.viewer.zoom img{width:260%}
+.viewer .bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;display:flex;gap:8px}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>소화기 점검 촬영 테스트</h1>
+    <button class="icon" id="torch" aria-pressed="false" aria-label="손전등">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+    </button>
+  </header>
+
+  <div class="stage">
+    <video id="cam" playsinline muted></video>
+    <div class="status" id="status">카메라를 켜는 중</div>
+    <div class="res" id="res" hidden></div>
+    <div class="empty" id="empty" hidden></div>
+  </div>
+
+  <footer>
+    <div class="label">저장 방식</div>
+    <div class="seg" id="mode">
+      <button data-v="frame" aria-pressed="false">화면 그대로</button>
+      <button data-v="photo" aria-pressed="false">고해상도</button>
+      <button data-v="both" aria-pressed="true">둘 다</button>
+    </div>
+    <div class="row">
+      <span>사진에 코드와 시각 새기기<br><small>사진 아래쪽에 띠로 들어갑니다</small></span>
+      <button class="switch" id="stamp" aria-pressed="true" aria-label="코드와 시각 새기기"></button>
+    </div>
+  </footer>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="card">
+    <h2 id="sheetTitle">저장했습니다</h2>
+    <div class="code" id="sheetCode"></div>
+    <div class="shots" id="shots"></div>
+    <p class="note">사진을 눌러 크게 보고 충압계 바늘이 읽히는지 확인하세요. 파일은 폰의 다운로드 폴더에 들어가고 갤러리에서도 보입니다.</p>
+    <button class="btn" id="next">다음 스캔</button>
+  </div>
+</div>
+
+<div class="viewer" id="viewer" hidden>
+  <img id="viewerImg" alt="">
+  <div class="bar">
+    <button class="icon" id="zoomBtn" aria-label="확대">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/></svg>
+    </button>
+    <button class="icon" id="closeViewer" aria-label="닫기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var FORMATS = ['qr_code', 'code_128', 'code_39', 'ean_13'];
+  var video = document.getElementById('cam');
+  var statusEl = document.getElementById('status');
+  var resEl = document.getElementById('res');
+  var emptyEl = document.getElementById('empty');
+  var S = { mode: 'both', stamp: true, torch: false, busy: false };
+  var stream = null, track = null, detector = null, lastVal = null, hits = 0;
+
+  function setStatus(t, hit) { statusEl.textContent = t; statusEl.classList.toggle('hit', !!hit); }
+
+  /* ---------- 설정 ---------- */
+  document.getElementById('mode').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    S.mode = b.dataset.v;
+    this.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  });
+  document.getElementById('stamp').addEventListener('click', function () {
+    S.stamp = !S.stamp; this.setAttribute('aria-pressed', S.stamp ? 'true' : 'false');
+  });
+  document.getElementById('torch').addEventListener('click', function () {
+    S.torch = !S.torch; this.setAttribute('aria-pressed', S.torch ? 'true' : 'false'); applyTorch();
+  });
+
+  /* ---------- 카메라 ---------- */
+  function getDetector() {
+    if (detector) return Promise.resolve(detector);
+    var nativeOk = Promise.resolve(false);
+    if ('BarcodeDetector' in window && window.BarcodeDetector.getSupportedFormats) {
+      nativeOk = window.BarcodeDetector.getSupportedFormats().then(function (f) { return f.indexOf('qr_code') >= 0 && f.indexOf('code_128') >= 0; }).catch(function () { return false; });
+    }
+    return nativeOk.then(function (ok) {
+      if (ok) { detector = new window.BarcodeDetector({ formats: FORMATS }); return detector; }
+      return import('https://cdn.jsdelivr.net/npm/barcode-detector@2/dist/es/pure.min.js').then(function (m) {
+        detector = new m.BarcodeDetector({ formats: FORMATS }); return detector;
+      });
+    });
+  }
+  function showEmpty(msg) {
+    emptyEl.hidden = false;
+    emptyEl.innerHTML = '<div>' + msg + '<br><button class="btn ghost" id="retry">다시 시도</button></div>';
+    document.getElementById('retry').onclick = function () { emptyEl.hidden = true; startCamera(); };
+    setStatus('카메라 꺼짐');
+  }
+  function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showEmpty('이 브라우저는 카메라를 쓸 수 없습니다. 안드로이드 크롬으로 열어 주세요.'); return; }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false })
+      .then(function (s) {
+        stream = s; track = s.getVideoTracks()[0]; video.srcObject = s;
+        try {
+          var caps = track.getCapabilities ? track.getCapabilities() : {};
+          if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(function () {});
+        } catch (e) {}
+        return video.play();
+      })
+      .then(function () {
+        resEl.hidden = false; resEl.textContent = '카메라 ' + video.videoWidth + '×' + video.videoHeight;
+        setStatus('QR이나 바코드를 화면에 넣으세요');
+        applyTorch(); loop();
+      })
+      .catch(function (e) {
+        var denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+        showEmpty(denied ? '카메라 권한이 막혀 있습니다. 주소창 왼쪽 자물쇠에서 카메라를 허용해 주세요.' : '카메라를 켜지 못했습니다.');
+      });
+  }
+  function applyTorch() {
+    if (!track) return;
+    var caps = track.getCapabilities ? track.getCapabilities() : {};
+    if (!caps.torch) { if (S.torch) { S.torch = false; document.getElementById('torch').setAttribute('aria-pressed', 'false'); setStatus('이 폰은 손전등을 켤 수 없습니다'); } return; }
+    track.applyConstraints({ advanced: [{ torch: !!S.torch }] }).catch(function () {});
+  }
+
+  /* ---------- 인식: 영상 전체를 그대로 넘긴다(작은 코드도 잡도록 해상도를 줄이지 않음) ---------- */
+  function loop() {
+    setTimeout(function () {
+      if (!stream) return;
+      if (S.busy || video.readyState < 2) { loop(); return; }
+      getDetector().then(function (d) { return d.detect(video); }).then(function (codes) {
+        var c = (codes || [])[0];
+        var val = c ? String(c.rawValue || '').trim() : '';
+        if (val && val === lastVal) hits++; else { lastVal = val; hits = val ? 1 : 0; }
+        if (val && hits >= 2 && !S.busy) { hits = 0; lastVal = null; capture(val, c.format); }
+        loop();
+      }).catch(function () { loop(); });
+    }, 120);
+  }
+
+  /* ---------- 저장 ---------- */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function stampTime(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+  function fileTime(d) { return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()); }
+  function safe(v) { return v.replace(/[^A-Za-z0-9가-힣_-]/g, '_').slice(0, 40) || 'CODE'; }
+
+  function toJpeg(src, w, h, val, when) {
+    var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    var g = cv.getContext('2d');
+    g.drawImage(src, 0, 0, w, h);
+    if (S.stamp) {
+      var fs = Math.max(18, Math.round(Math.min(w, h) * 0.04)), band = Math.round(fs * 1.9);
+      g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(0, h - band, w, band);
+      g.fillStyle = '#fff'; g.font = '700 ' + fs + 'px sans-serif'; g.textBaseline = 'middle';
+      g.fillText(val + '   ' + stampTime(when), Math.round(fs * 0.6), h - band / 2);
+    }
+    return new Promise(function (res) { cv.toBlob(res, 'image/jpeg', 0.92); });
+  }
+  function download(blob, name) {
+    var u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    return u;
+  }
+  function photoBitmap() {
+    if (!('ImageCapture' in window) || !track) return Promise.reject(new Error('이 브라우저는 고해상도 촬영을 지원하지 않습니다'));
+    return new ImageCapture(track).takePhoto().then(function (b) { return createImageBitmap(b); });
+  }
+
+  function capture(val, format) {
+    S.busy = true;
+    if (navigator.vibrate) navigator.vibrate(80);
+    var when = new Date();
+    var base = safe(val) + '_' + fileTime(when);
+    var W = video.videoWidth, H = video.videoHeight;
+    var out = [];
+    setStatus('인식: ' + val, true);
+
+    /* 화면 그대로: 인식한 그 순간의 영상 한 장을 바로 굳힌다 */
+    var p = Promise.resolve();
+    if (S.mode !== 'photo') {
+      p = toJpeg(video, W, H, val, when).then(function (b) {
+        var name = base + '_frame.jpg';
+        out.push({ kind: '화면 그대로', name: name, url: download(b, name), size: W + '×' + H, kb: Math.round(b.size / 1024) });
+      });
+    }
+    /* 고해상도: 카메라 셔터를 한 번 더 누른다 (흔들리지 않게 잠깐 멈춰야 함) */
+    if (S.mode !== 'frame') {
+      p = p.then(function () {
+        setStatus('고해상도 촬영 중, 움직이지 마세요', true);
+        return photoBitmap();
+      }).then(function (bm) {
+        return toJpeg(bm, bm.width, bm.height, val, when).then(function (b) {
+          var name = base + '_photo.jpg';
+          out.push({ kind: '고해상도', name: name, url: download(b, name), size: bm.width + '×' + bm.height, kb: Math.round(b.size / 1024) });
+        });
+      }).catch(function (e) {
+        out.push({ kind: '고해상도', err: '촬영하지 못했습니다 (' + ((e && e.message) || '원인 모름') + ')' });
+      }).then(applyTorch);
+    }
+    p.then(function () { setStatus('인식: ' + val, true); showResult(val, format, out); });
+  }
+
+  /* ---------- 결과 ---------- */
+  var FORMAT_NAME = { qr_code: 'QR', code_128: '바코드(Code 128)', code_39: '바코드(Code 39)', ean_13: '바코드(EAN-13)' };
+  function showResult(val, format, out) {
+    document.getElementById('sheetCode').textContent = (FORMAT_NAME[format] || format) + ' · ' + val;
+    var box = document.getElementById('shots'); box.innerHTML = '';
+    out.forEach(function (o) {
+      var el = document.createElement('button'); el.className = 'shot';
+      if (o.err) {
+        el.classList.add('fail');
+        el.innerHTML = '<div><b>' + o.kind + '</b><br><span class="err">' + o.err + '</span></div>';
+        el.disabled = true;
+      } else {
+        el.innerHTML = '<img alt=""><div><b>' + o.kind + '</b> ' + o.size + '<br>' + o.kb + 'KB · ' + o.name + '</div>';
+        el.querySelector('img').src = o.url;
+        el.onclick = function () { openViewer(o.url); };
+      }
+      box.appendChild(el);
+    });
+    document.getElementById('sheetTitle').textContent = out.some(function (o) { return !o.err; }) ? '저장했습니다' : '저장하지 못했습니다';
+    document.getElementById('sheet').hidden = false;
+  }
+  document.getElementById('next').onclick = function () {
+    document.getElementById('sheet').hidden = true;
+    setStatus('QR이나 바코드를 화면에 넣으세요');
+    setTimeout(function () { S.busy = false; }, 600);
+  };
+  var viewer = document.getElementById('viewer');
+  function openViewer(u) { document.getElementById('viewerImg').src = u; viewer.classList.remove('zoom'); viewer.hidden = false; }
+  document.getElementById('zoomBtn').onclick = function () { viewer.classList.toggle('zoom'); };
+  document.getElementById('closeViewer').onclick = function () { viewer.hidden = true; };
+
+  getDetector().catch(function () {});
+  startCamera();
+})();
+</script>
+</body>
+</html>
