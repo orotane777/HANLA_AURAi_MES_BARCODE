@@ -44,6 +44,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-l
 .themeOpt.sel{border:2px solid var(--accent)}
 .themeOpt .sw{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
 .themeOpt .sw i{width:18px;height:18px;border-radius:50%}
+.themeOpt .sw svg{width:22px;height:22px}
 .themeOpt .radio{margin-left:auto;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center}
 .themeOpt.sel .radio{border-color:var(--accent)}
 .themeOpt.sel .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
@@ -106,7 +107,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-l
 .memoLine{margin-top:22px;max-width:300px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
 .memoLine span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.toast{position:absolute;left:16px;right:16px;bottom:calc(var(--bottom) + 146px);height:52px;padding:0 18px;border-radius:26px;background:var(--surface2);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:5}
+.toast{position:absolute;left:16px;right:16px;bottom:calc(var(--bottom) + 196px);height:52px;padding:0 18px;border-radius:26px;background:var(--surface2);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:5}
 
 .cats{position:absolute;left:0;right:0;bottom:var(--bottom);display:flex;justify-content:center;gap:22px;z-index:4}
 .cat{width:96px;display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -173,6 +174,46 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
 .legend span{color:var(--muted)}
 .legend b{margin-left:auto}
 .full{height:56px;border-radius:28px;border:1px solid var(--line);background:var(--surface);font-size:16px;font-weight:700;flex-shrink:0}
+
+/* v0.2 멀티: 스캔 화면은 틀을 위로 올리고, 분류 버튼 위에 싱글/멀티 버튼을 둔다 */
+.center.scan{justify-content:flex-start;padding-top:20px;bottom:calc(var(--bottom) + 196px)}
+.vf.lock{border-color:var(--accent)}
+.vf .mtag{position:absolute;left:44px;top:15px;font-size:12px;font-weight:800;letter-spacing:.04em;color:#E9ECEF;white-space:nowrap}
+.modebar{position:absolute;left:0;right:0;bottom:calc(var(--bottom) + 132px);display:flex;justify-content:center;gap:16px;z-index:4}
+.modeBtn{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
+.modeBtn svg{width:24px;height:24px}
+.modeBtn.sel{border:3px solid var(--accent);color:var(--text)}
+.modeBtn.go{border:0;background:var(--accent);color:var(--onAccent);box-shadow:0 0 0 5px var(--glowSoft)}
+.modeBtn.off{opacity:.35;pointer-events:none}
+.cat.off{opacity:.3;pointer-events:none}
+.basket{width:min(320px,86vw);flex-shrink:1!important;min-height:0;display:flex;flex-direction:column;border-radius:20px;background:var(--surface);border:1px solid var(--line);padding:6px}
+.blist{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;max-height:252px;display:flex;flex-direction:column;gap:4px}
+.brow{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 4px 0 12px;border-radius:14px;background:var(--surface2);flex-shrink:0}
+.brow .t{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.brow .t b{flex-shrink:0;font-size:14px}
+.brow .t span{min-width:0;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.brow .n{flex-shrink:0;font-size:12px;font-weight:700;color:var(--muted)}
+.brow .x{width:36px;height:36px;flex-shrink:0;border-radius:50%;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
+.brow .x svg{width:18px;height:18px}
+.dlgWrap{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:24px}
+.dlgWrap .scrim{position:absolute;inset:0;border:0;background:var(--scrim)}
+.dlg{position:relative;width:min(320px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:26px 18px 16px;display:flex;flex-direction:column;gap:20px}
+.dlg p{margin:0;text-align:center;font-size:17px;font-weight:800;line-height:1.4}
+.dlg p small{display:block;margin-top:6px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subT{font-size:13px;font-weight:700;color:var(--muted);margin-left:8px}
+.jcard{border:1px solid var(--line);border-radius:18px;overflow:hidden;flex-shrink:0}
+.jh{width:100%;min-height:54px;border:0;background:transparent;display:flex;align-items:center;gap:8px;padding:0 10px 0 16px;text-align:left}
+.jh .jt{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.jh .jt b{flex-shrink:0;font-size:15px}
+.jh .jt span{min-width:0;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.jh .jn{flex-shrink:0;font-size:12px;font-weight:700;color:var(--muted)}
+.jh .jc{flex-shrink:0;font-size:13px;font-weight:800}
+.jh .chev{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:transform .2s}
+.jh .chev.up{transform:rotate(180deg)}
+.jb{border-top:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--surface2)}
+.jb .kv{border-radius:14px;background:var(--surface)}
+.jb .order{background:var(--surface)}
+.ver{margin-top:auto;text-align:center;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -210,8 +251,13 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   var JOBS = {
     '202609280042': { ship: 'H2861', item: 'Automation assembly', req: '202609280042', orders: [ { no: '202609280117', item: 'Automation assembly', qty: '1 EA' } ] },
     '202609280051': { ship: 'H2874', item: 'Local control cabinet', req: '202609280051', orders: [ { no: '202609280131', item: 'No.1 Local control cabinet', qty: '1 EA' }, { no: '202609280132', item: 'No.2 Local control cabinet', qty: '1 EA' }, { no: '202609280133', item: 'No.3 Local control cabinet', qty: '1 EA' } ] },
-    '202609280063': { ship: 'H2890', item: 'Junction box', req: '202609280063', orders: [ { no: '202609280150', item: 'Junction box', qty: '2 EA' } ] }
+    '202609280063': { ship: 'H2890', item: 'Junction box', req: '202609280063', orders: [ { no: '202609280150', item: 'Junction box', qty: '2 EA' } ] },
+    '202609280052': { ship: 'H2875', item: 'Local control cabinet', req: '202609280052', orders: [ { no: '202609280134', item: 'No.1 Local control cabinet', qty: '1 EA' }, { no: '202609280135', item: 'No.2 Local control cabinet', qty: '1 EA' } ] },
+    '202609280053': { ship: 'H2876', item: 'Local control cabinet', req: '202609280053', orders: [ { no: '202609280136', item: 'No.1 Local control cabinet', qty: '1 EA' }, { no: '202609280137', item: 'No.2 Local control cabinet', qty: '1 EA' }, { no: '202609280138', item: 'No.3 Local control cabinet', qty: '1 EA' }, { no: '202609280139', item: 'No.4 Local control cabinet', qty: '1 EA' } ] },
+    '202609280054': { ship: 'H2877', item: 'Main switchboard', req: '202609280054', orders: [ { no: '202609280140', item: 'Main switchboard', qty: '1 EA' } ] },
+    '202609280055': { ship: 'H2878', item: 'Local control cabinet', req: '202609280055', orders: [ { no: '202609280141', item: 'No.1 Local control cabinet', qty: '1 EA' }, { no: '202609280142', item: 'No.2 Local control cabinet', qty: '1 EA' } ] }
   };
+  var VERSION = 'v0.2';
   var CODES = Object.keys(JOBS);
   var CAT = { ship: '호선작업', support: '생산지원', nonprod: '생산외' };
   var NONPROD = ['청소·정리', '조례·회의', '안전·직무교육', '설비 점검·수리'];
@@ -238,21 +284,34 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     user: '<svg class="i" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6"/></svg>',
     dash: '<svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M5 20V12"/><path d="M12 20V5"/><path d="M19 20v-9"/></svg>',
     gear: '<svg class="i" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
-    back: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'
+    back: '<svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+    down: '<svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+    single: '<svg class="i" viewBox="0 0 24 24"><path d="M7.5 3.5h7a2 2 0 0 1 2 2V16l-4.5 4.5H7.5a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M16.5 16h-3a1.5 1.5 0 0 0-1.5 1.5v3"/></svg>',
+    multi: '<svg class="i" viewBox="0 0 24 24"><path d="M8.5 5v-.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H17"/><path d="M6 7.5V7a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-.5"/><path d="M5.5 7.5h7a2 2 0 0 1 2 2V18L11 21.5H5.5a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2z"/><path d="M14.5 18h-2a1.5 1.5 0 0 0-1.5 1.5v2"/></svg>',
+    go: '<svg class="i" viewBox="0 0 24 24" style="stroke-width:2.6"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    x: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.2 9.2l5.6 5.6"/><path d="M14.8 9.2l-5.6 5.6"/></svg>'
   };
 
   /* ---------- state ---------- */
   var today = new Date().toDateString();
-  var S = { screen: 'ready', mode: 'barcode', armed: 'ship', run: null, sheet: null, page: null, notice: null, lastJob: null, toast: null, err: null, torch: false, menu: false, memo: '', pending: null, demoIdx: 0, tally: { ship: 0, support: 0, nonprod: 0 }, cam: 'idle' };
+  /* 사용자별 설정: 기본 촬영 방식(싱글/멀티)과 가운데 분류 버튼(호선작업/생산지원). 처음 설치하면 싱글·호선작업 */
+  var PREF = { mode: 'single', center: 'ship' };
+  try { var sp = JSON.parse(localStorage.getItem('worklog-prefs') || 'null'); if (sp) { if (sp.mode === 'multi') PREF.mode = 'multi'; if (sp.center === 'support') PREF.center = 'support'; } } catch (e) {}
+  function savePref() { try { localStorage.setItem('worklog-prefs', JSON.stringify(PREF)); } catch (e) {} }
+
+  /* run = { cat, jobs: [요청서...], start, memo }. 생산외는 jobs 없이 item만 둔다.
+     pmode = 지금 스캔 화면의 촬영 방식, basket = 멀티에서 담은 요청서, lock = 틀 안에 잡혀 있는 바코드 */
+  var S = { screen: 'ready', pmode: PREF.mode, armed: PREF.center, basket: [], lock: null, shot: false, confirm: null, open: {}, run: null, sheet: null, page: null, notice: null, lastJob: null, toast: null, err: null, torch: false, menu: false, memo: '', pending: null, demoIdx: 0, tally: { ship: 0, support: 0, nonprod: 0 }, cam: 'idle' };
+  var STORE = 'worklog-demo-v2';
   try {
-    var saved = JSON.parse(localStorage.getItem('worklog-demo') || 'null');
+    var saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (saved && saved.day === today) {
       S.tally = saved.tally || S.tally;
       if (saved.run) { S.run = saved.run; S.screen = 'running'; }
     }
   } catch (e) {}
   function save() {
-    try { localStorage.setItem('worklog-demo', JSON.stringify({ day: today, tally: S.tally, run: S.run })); } catch (e) {}
+    try { localStorage.setItem(STORE, JSON.stringify({ day: today, tally: S.tally, run: S.run })); } catch (e) {}
   }
 
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -262,7 +321,10 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function elapsed() { return S.run ? Math.max(0, (Date.now() - S.run.start) / 1000) : 0; }
   function isScanner() { return S.screen === 'ready' || S.screen === 'rearm' || S.screen === 'success'; }
-  function runTitle() { return S.run ? (S.run.cat === 'nonprod' ? S.run.item : S.run.ship + '  ' + S.run.item) : ''; }
+  function more(jobs) { return jobs && jobs.length > 1 ? ' 외 ' + (jobs.length - 1) + '장' : ''; }
+  function jobTitle(r) { return r.cat === 'nonprod' ? r.item : r.jobs[0].ship + '  ' + r.jobs[0].item + more(r.jobs); }
+  function runTitle() { return S.run ? jobTitle(S.run) : ''; }
+  function multiOn() { return S.pmode === 'multi' && isScanner(); }
 
   /* ---------- actions ---------- */
   function closeRun(at) {
@@ -273,26 +335,54 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     clearTimeout(toastT); S.toast = text; render();
     toastT = setTimeout(function () { S.toast = null; render(); }, 2200);
   }
+  /* 스캔 화면을 처음 상태로: 촬영 방식과 가운데 분류는 설정값으로 돌아간다 */
+  function resetScan() { S.pmode = PREF.mode; S.armed = PREF.center; S.basket = []; S.lock = null; S.shot = false; resetSeen(); }
   function startRun(next) {
     closeRun();
     S.run = Object.assign({}, next, { start: Date.now(), memo: '' });
-    S.screen = 'running'; S.sheet = null; S.pending = null; S.notice = null; S.err = null; S.menu = false;
-    save(); render();
+    S.screen = 'running'; S.sheet = null; S.pending = null; S.notice = null; S.err = null; S.menu = false; S.confirm = null; S.open = {};
+    resetScan(); save(); render();
   }
   function stop() {
-    closeRun(); S.run = null; S.screen = 'ready'; S.armed = 'ship'; S.sheet = null;
-    save(); toast('기록을 종료했어요');
+    closeRun(); S.run = null; S.screen = 'ready'; S.sheet = null; S.confirm = null;
+    resetScan(); save(); toast('기록을 종료했어요');
   }
   var scanT = null;
   function scanned(code) {
     if (S.screen === 'success') return;
     var job = JOBS[code];
     if (!job) { flashErr('등록 안 된 바코드예요'); return; }
-    if (S.run && S.run.req === job.req && S.run.cat === S.armed) { S.screen = 'running'; render(); toast('이미 기록 중인 작업이에요'); return; }
-    S.screen = 'success'; S.pending = Object.assign({}, job, { cat: S.armed });
+    if (S.run && S.run.cat === S.armed && S.run.jobs && S.run.jobs.length === 1 && S.run.jobs[0].req === job.req) { S.screen = 'running'; S.lock = null; render(); toast('이미 기록 중인 작업이에요'); return; }
+    S.screen = 'success'; S.pending = { cat: S.armed, jobs: [job] };
     feedback(); render();
     clearTimeout(scanT);
     scanT = setTimeout(function () { var p = S.pending; if (p) startRun(p); }, 700);
+  }
+  function setLock(v) { if (S.lock === v) return; S.lock = v; render(); }
+  /* 멀티: 틀에 잡힌 바코드를 가운데 큰 버튼으로 담는다. 자동으로는 담지 않는다 */
+  var shotT = null;
+  function shutter() {
+    if (!S.lock) { flashErr('바코드를 사각틀에 맞춰 주세요'); return; }
+    var job = JOBS[S.lock];
+    if (!job) { flashErr('등록 안 된 바코드예요'); return; }
+    if (S.basket.some(function (j) { return j.req === job.req; })) { flashErr('이미 담겨 있어요'); return; }
+    S.basket.push(job); S.err = null; S.shot = true; feedback(); render();
+    var list = app.querySelector('.blist'); if (list) list.scrollTop = list.scrollHeight;
+    clearTimeout(shotT);
+    shotT = setTimeout(function () { S.shot = false; render(); }, 700);
+  }
+  function tapMode(v) {
+    S.menu = false;
+    if (v === 'go') { if (S.basket.length) startRun({ cat: S.armed, jobs: S.basket.slice(), multi: true }); return; }
+    if (S.basket.length || S.pmode === v) return;
+    S.pmode = v; S.lock = null; S.err = null; resetSeen(); render();
+  }
+  function ask(kind, i) { S.confirm = { kind: kind, i: i }; S.menu = false; render(); }
+  function answer(yes) {
+    var c = S.confirm; S.confirm = null;
+    if (yes && c && c.kind === 'stop') { stop(); return; }
+    if (yes && c && c.kind === 'remove') { S.basket.splice(c.i, 1); }
+    render();
   }
   var errT = null;
   function flashErr(msg) {
@@ -301,10 +391,12 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   }
   function tapCat(cat) {
     S.menu = false;
+    if (S.basket.length && cat !== S.armed) return;
     if (cat === 'nonprod') { S.sheet = 'nonprod'; render(); return; }
     if (S.screen === 'success') return;
     if (S.screen === 'running') { S.screen = 'rearm'; S.armed = cat; render(); return; }
-    if (S.screen === 'rearm' && S.armed === cat) { S.screen = 'running'; render(); return; }
+    if (multiOn() && cat === S.armed) { shutter(); return; }
+    if (S.screen === 'rearm' && S.armed === cat) { S.screen = 'running'; resetScan(); render(); return; }
     S.armed = cat; render();
   }
 
@@ -399,24 +491,31 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     roiCtx.drawImage(video, sx, sy, sw, sh, 0, 0, roi.width, roi.height);
     return roi;
   }
-  var lastSeen = null, seenCount = 0;
+  /* 같은 번호가 연속 두 번 읽혀야 확정한다. 싱글은 확정하면 바로 시작하고,
+     멀티는 틀만 강조색으로 잡아 두고 버튼을 기다린다. 세 번 연속 안 보이면 잡은 것을 푼다. */
+  var lastSeen = null, seenCount = 0, missCount = 0;
+  /* 모드를 바꾸면 세던 것을 버린다. 멀티에서 두 번 본 바코드가 싱글로 넘어와 한 번에 시작되지 않게 */
+  function resetSeen() { lastSeen = null; seenCount = 0; missCount = 0; }
   function loop() {
     clearTimeout(loopT);
     if (!stream) return;
     loopT = setTimeout(function () {
       if (!stream) return;
-      var ready = (S.screen === 'ready' || S.screen === 'rearm') && !S.sheet && !S.menu && !S.page && video.readyState >= 2;
+      var ready = (S.screen === 'ready' || S.screen === 'rearm') && !S.sheet && !S.menu && !S.page && !S.confirm && video.readyState >= 2;
       if (!ready || detecting) { loop(); return; }
       var frame = cropToBox();
       if (!frame) { loop(); return; }
       detecting = true;
       getDetector().then(function (d) { return d.detect(frame); }).then(function (codes) {
         detecting = false;
-        var want = S.mode === 'qr' ? function (c) { return c.format === 'qr_code'; } : function (c) { return c.format !== 'qr_code'; };
-        var hit = (codes || []).filter(want)[0];
+        var hit = (codes || [])[0];
         var val = hit ? String(hit.rawValue || '').trim() : null;
         if (val && val === lastSeen) { seenCount++; } else { lastSeen = val; seenCount = val ? 1 : 0; }
-        if (val && seenCount >= 2) { lastSeen = null; seenCount = 0; scanned(val); }
+        missCount = val ? 0 : missCount + 1;
+        if (S.pmode === 'multi') {
+          if (val && seenCount >= 2) setLock(val);
+          else if (missCount >= 3) setLock(null);
+        } else if (val && seenCount >= 2) { lastSeen = null; seenCount = 0; scanned(val); }
         loop();
       }).catch(function () { detecting = false; loop(); });
     }, 180);
@@ -438,14 +537,28 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     var armedCat = S.sheet === 'nonprod' ? 'nonprod' : (isScanner() ? S.armed : null);
     var runCat = (!armedCat && S.screen === 'running' && S.run) ? S.run.cat : null;
     if (key === armedCat) cls = ' armed'; else if (key === runCat) cls = ' running';
+    if (S.basket.length && key !== S.armed) cls += ' off';
     return '<div class="cat' + cls + '"><div class="well"><button data-act="cat" data-v="' + key + '" aria-label="' + CAT[key] + '">' + icon + '</button></div><label>' + CAT[key] + '</label></div>';
   }
   function guideText() {
     if (S.err) return S.err;
     if (S.screen === 'success') return '인식됐어요';
+    if (S.shot) return '담았어요';
+    if (multiOn() && S.lock) return '버튼을 누르면 담겨요';
     if (S.cam === 'denied') return '카메라 권한이 없어요';
     if (S.cam === 'none') return '이 기기는 카메라를 쓸 수 없어요';
-    return S.mode === 'qr' ? 'QR을 사각틀에 맞춰 주세요' : '바코드를 사각틀에 맞춰 주세요';
+    return '바코드를 사각틀에 맞춰 주세요';
+  }
+  /* 상세의 요청서 카드. 머리줄은 호선+품명(넘치면 품명 쪽을 자름)과 작업지시 건수, 오른쪽에 접기 */
+  function jobCard(j, r, single) {
+    var open = S.open[j.req] !== undefined ? S.open[j.req] : single;
+    var h = '<div class="jcard"><button class="jh" data-act="fold" data-v="' + esc(j.req) + '" aria-expanded="' + open + '"><span class="jt"><b>' + esc(j.ship) + '</b><span>' + esc(j.item) + '</span></span><span class="jn">' + j.orders.length + '건</span>' +
+      (single ? '<span class="jc">' + CAT[r.cat] + '</span>' : '') + '<span class="chev' + (open ? ' up' : '') + '">' + I.down + '</span></button>';
+    if (open) {
+      h += '<div class="jb"><div class="kv"><div><span>요청번호</span><span class="num">' + esc(j.req) + '</span></div><div><span>분류</span><span>' + CAT[r.cat] + '</span></div><div><span>시작</span><span class="num">' + hm(r.start) + '</span></div></div>' +
+        '<div class="orders"><div class="cap">작업지시 ' + j.orders.length + '건</div>' + j.orders.map(function (o) { return '<div class="order"><div class="l"><b>' + esc(o.item) + '</b><span class="num">' + esc(o.no) + '</span></div><span class="q num">' + esc(o.qty) + '</span></div>'; }).join('') + '</div></div>';
+    }
+    return h + '</div>';
   }
   function dayHtml() {
     var segs = { ship: S.tally.ship, support: S.tally.support, nonprod: S.tally.nonprod };
@@ -469,10 +582,11 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
         CHIPS.map(function (l) { return '<button class="' + (S.memo.trim() === l ? 'sel' : '') + '" data-act="chip" data-v="' + esc(l) + '">' + esc(l) + '</button>'; }).join('') +
         '</div><div class="row2"><button class="btnOut" data-act="closeSheet">취소</button><button class="btnFill" data-act="saveMemo">저장</button></div>';
     } else if (S.sheet === 'detail' && S.run) {
-      var r = S.run, n = r.orders ? r.orders.length : 0;
+      var r = S.run, jobs = r.jobs || [], multi = !!r.multi || jobs.length > 1;
       h = h.replace('<div class="sheet">', '<div class="sheet split">');
-      h += '<div class="sheetHead"><h3>상세</h3><button class="cbtn" data-act="closeSheet" aria-label="닫기">' + I.close + '</button></div><div class="sheetBody"><div class="kv"><div><span>작업</span><span>' + esc(runTitle()) + '</span></div><div><span>요청번호</span><span class="num">' + esc(r.req || '없음') + '</span></div><div><span>분류</span><span>' + CAT[r.cat] + '</span></div><div><span>시작</span><span class="num">' + hm(r.start) + '</span></div></div>';
-      if (n) h += '<div class="orders"><div class="cap">작업지시 ' + n + '건</div>' + r.orders.map(function (o) { return '<div class="order"><div class="l"><b>' + esc(o.item) + '</b><span class="num">' + esc(o.no) + '</span></div><span class="q num">' + esc(o.qty) + '</span></div>'; }).join('') + '</div>';
+      h += '<div class="sheetHead"><h3>상세' + (multi ? '<span class="subT">Multi · ' + CAT[r.cat] + ' · ' + jobs.length + '장</span>' : '') + '</h3><button class="cbtn" data-act="closeSheet" aria-label="닫기">' + I.close + '</button></div><div class="sheetBody">';
+      if (r.cat === 'nonprod') h += '<div class="kv"><div><span>작업</span><span>' + esc(r.item) + '</span></div><div><span>분류</span><span>' + CAT[r.cat] + '</span></div><div><span>시작</span><span class="num">' + hm(r.start) + '</span></div></div>';
+      else h += jobs.map(function (j) { return jobCard(j, r, !multi); }).join('');
       if (r.memo) h += '<div class="memoBox"><span>메모</span><span>' + esc(r.memo) + '</span></div>';
       h += dayHtml() + '</div>';
     }
@@ -491,37 +605,63 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
       '<button class="mi" disabled><span class="ic">' + I.dash + '</span>대시보드 <small>(구현중)</small></button>' +
       '<button class="mi" data-act="settings"><span class="ic">' + I.gear + '</span>설정</button></div>';
     if (S.notice === 'lunch' && S.lastJob) {
-      h += '<div class="notice"><span class="ic">' + I.clock + '</span><div class="tx"><b>점심시간에 자동 종료됐어요</b><span>' + esc(S.lastJob.ship ? S.lastJob.ship + ' · ' + S.lastJob.item : S.lastJob.item) + '</span></div><button class="pill" data-act="resume">이어서 하기</button></div>';
+      h += '<div class="notice"><span class="ic">' + I.clock + '</span><div class="tx"><b>점심시간에 자동 종료됐어요</b><span>' + esc(jobTitle(S.lastJob)) + '</span></div><button class="pill" data-act="resume">이어서 하기</button></div>';
     }
-    h += '<div class="center' + (S.notice ? ' withNotice' : '') + (S.screen === 'rearm' ? ' rearm' : '') + (S.sheet === 'memo' ? ' memoMode' : '') + '">';
+    h += '<div class="center' + (sc ? ' scan' : '') + (S.notice ? ' withNotice' : '') + (S.screen === 'rearm' ? ' rearm' : '') + (S.sheet === 'memo' ? ' memoMode' : '') + '">';
     if (sc) {
       if (S.screen === 'rearm' && S.run) h += '<div class="strip above"><span class="dot"></span><span class="t">' + esc(runTitle()) + '</span><span class="n num" data-timer>' + fmt(elapsed()) + '</span><button class="stripX" data-act="closeScanner" aria-label="스캐너 닫기">' + I.close + '</button></div>';
-      h += '<div class="modes above"><button class="mode' + (S.mode === 'barcode' ? ' sel' : '') + '" data-act="mode" data-v="barcode" aria-label="바코드">' + I.barcode + '</button><button class="mode' + (S.mode === 'qr' ? ' sel' : '') + '" data-act="mode" data-v="qr" aria-label="QR">' + I.qr + '</button></div>';
-      var ok = S.screen === 'success';
-      h += '<button class="vf' + (S.mode === 'qr' ? ' qr' : '') + (ok ? ' ok' : '') + '" data-act="demoScan" aria-label="스캔 창 (누르면 데모 스캔)" style="--corner:' + (ok ? 'var(--accent)' : (S.err ? '#FF8A6B' : '#F2F4F6')) + '">' +
+      var ok = S.screen === 'success' || S.shot, lit = ok || S.lock;
+      h += '<button class="vf' + (ok ? ' ok' : '') + (lit ? ' lock' : '') + '" data-act="demoScan" aria-label="스캔 창 (누르면 데모 스캔)" style="--corner:' + (lit ? 'var(--accent)' : (S.err ? '#FF8A6B' : '#F2F4F6')) + '">' +
         '<span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>' +
+        (S.pmode === 'multi' ? '<span class="mtag">Multi Mode</span>' : '') +
         (!ok ? '<span class="aim"></span>' : '') +
-        (!ok && !S.err ? '<span class="line"></span>' : '') +
+        (!ok && !S.err && !S.lock ? '<span class="line"></span>' : '') +
         (ok ? '<span class="flash"></span><span class="check">' + I.check + '</span>' : '') +
-        '<span class="guide' + (S.err || S.cam === 'denied' || S.cam === 'none' ? ' err' : '') + '">' + esc(guideText()) + '</span></button>';
+        '<span class="guide' + (S.err || (!lit && (S.cam === 'denied' || S.cam === 'none')) ? ' err' : '') + '">' + esc(guideText()) + '</span></button>';
+      if (S.basket.length) h += '<div class="basket above"><div class="blist">' + S.basket.map(function (j, i) {
+        return '<div class="brow"><span class="t"><b>' + esc(j.ship) + '</b><span>' + esc(j.item) + '</span></span><span class="n">' + j.orders.length + '건</span><button class="x" data-act="askRemove" data-v="' + i + '" aria-label="목록에서 빼기">' + I.x + '</button></div>';
+      }).join('') + '</div></div>';
     } else if (S.screen === 'running' && S.run) {
-      var r = S.run, n = r.orders ? r.orders.length : 0;
-      h += '<div class="run"><div class="runBox"><div class="runHead"><span class="h">' + esc(r.cat === 'nonprod' ? r.item : r.ship) + '</span><span class="s">' + esc(r.cat === 'nonprod' ? '' : r.item) + '</span>' + (n > 1 ? '<span class="chip">' + n + '건</span>' : '') + '</div><div class="timer num" data-timer>' + fmt(elapsed()) + '</div></div>' +
-        '<div class="ctl"><button data-act="stop" aria-label="종료">' + I.stop + '</button><button data-act="detail" aria-label="상세">' + I.up + '</button></div>' +
+      var r = S.run, jobs = r.jobs || [], n = jobs.length === 1 ? jobs[0].orders.length : 0;
+      var tag = jobs.length > 1 ? '외 ' + (jobs.length - 1) + '장' : (n > 1 ? n + '건' : '');
+      h += '<div class="run"><div class="runBox"><div class="runHead"><span class="h">' + esc(r.cat === 'nonprod' ? r.item : jobs[0].ship) + '</span><span class="s">' + esc(r.cat === 'nonprod' ? '' : jobs[0].item) + '</span>' + (tag ? '<span class="chip">' + tag + '</span>' : '') + '</div><div class="timer num" data-timer>' + fmt(elapsed()) + '</div></div>' +
+        '<div class="ctl"><button data-act="askStop" aria-label="종료">' + I.stop + '</button><button data-act="detail" aria-label="상세">' + I.up + '</button></div>' +
         (r.memo ? '<div class="memoLine">' + I.pencilSm + '<span>' + esc(r.memo) + '</span></div>' : '') + '</div>';
     }
     h += '</div>';
     if (S.toast) h += '<div class="toast">' + esc(S.toast) + '</div>';
-    h += '<div class="cats">' + catHtml('support', I.support) + catHtml('ship', I.ship) + catHtml('nonprod', I.nonprod) + '</div>';
+    if (sc) {
+      var full = S.basket.length > 0;
+      h += '<div class="modebar"><button class="modeBtn' + (S.pmode === 'single' ? ' sel' : '') + (full ? ' off' : '') + '" data-act="pmode" data-v="single" aria-label="싱글 모드">' + I.single + '</button>' +
+        (full ? '<button class="modeBtn go" data-act="pmode" data-v="go" aria-label="담은 ' + S.basket.length + '장 기록 시작">' + I.go + '</button>'
+              : '<button class="modeBtn' + (S.pmode === 'multi' ? ' sel' : '') + '" data-act="pmode" data-v="multi" aria-label="멀티 모드">' + I.multi + '</button>') + '</div>';
+    }
+    var side = PREF.center === 'ship' ? 'support' : 'ship';
+    h += '<div class="cats">' + catHtml(side, I[side]) + catHtml(PREF.center, I[PREF.center]) + catHtml('nonprod', I.nonprod) + '</div>';
     if (S.sheet) h += sheetHtml();
+    if (S.confirm) {
+      var c = S.confirm, isStop = c.kind === 'stop', sub = isStop ? runTitle() : (S.basket[c.i] ? S.basket[c.i].ship + '  ' + S.basket[c.i].item : '');
+      h += '<div class="dlgWrap"><button class="scrim" data-act="confirmNo" aria-label="취소"></button><div class="dlg" role="alertdialog"><p>' + (isStop ? '작업을 종료하시겠습니까?' : '이 요청서를 목록에서 뺄까요?') + '<small>' + esc(sub) + '</small></p>' +
+        '<div class="row2"><button class="btnOut" data-act="confirmNo">취소</button><button class="btnFill" data-act="confirmYes">' + (isStop ? '종료' : '빼기') + '</button></div></div></div>';
+    }
     if (S.page === 'settings') {
+      var opt = function (act, v, on, sw, label) { return '<button class="themeOpt' + (on ? ' sel' : '') + '" data-act="' + act + '" data-v="' + v + '"><span class="sw">' + sw + '</span>' + label + '<span class="radio"></span></button>'; };
       h += '<div class="page"><div class="pageHead"><button class="cbtn" data-act="closePage" aria-label="뒤로">' + I.back + '</button><h2>설정</h2></div>' +
-        '<div class="sec"><div class="lb">테마</div>' +
+        '<div class="sec"><div class="lb">처음 열 때 촬영 방식</div>' +
+        opt('prefMode', 'single', PREF.mode === 'single', I.single, '싱글 (한 장씩 자동)') +
+        opt('prefMode', 'multi', PREF.mode === 'multi', I.multi, '멀티 (여러 장 담기)') +
+        '</div><div class="sec"><div class="lb">가운데 버튼</div>' +
+        opt('prefCenter', 'ship', PREF.center === 'ship', I.ship, '호선작업') +
+        opt('prefCenter', 'support', PREF.center === 'support', I.support, '생산지원') +
+        '</div><div class="sec"><div class="lb">테마</div>' +
         '<button class="themeOpt' + (theme === 'light' ? ' sel' : '') + '" data-act="theme" data-v="light"><span class="sw" style="background:#F2F3EF"><i style="background:#1F4FE0"></i></span>라이트<span class="radio"></span></button>' +
         '<button class="themeOpt' + (theme === 'dark' ? ' sel' : '') + '" data-act="theme" data-v="dark"><span class="sw" style="background:#0A0C0E"><i style="background:#FFD000"></i></span>다크<span class="radio"></span></button>' +
-        '</div></div>';
+        '</div><div class="ver">작업기록 데모 ' + VERSION + '</div></div>';
     }
+    /* 화면을 통째로 다시 그리므로, 스크롤하던 목록이 맨 위로 튀지 않게 위치를 옮겨 담는다 */
+    var keep = ['.blist', '.sheetBody'].map(function (s) { var el = app.querySelector(s); return el ? el.scrollTop : 0; });
     app.innerHTML = h;
+    ['.blist', '.sheetBody'].forEach(function (s, i) { var el = app.querySelector(s); if (el) el.scrollTop = keep[i]; });
     var ta = document.getElementById('memo');
     if (ta) ta.addEventListener('input', function () { S.memo = ta.value; var sel = app.querySelectorAll('.chips button'); sel.forEach(function (b) { b.classList.toggle('sel', S.memo.trim() === b.dataset.v); }); });
     syncCamera();
@@ -566,11 +706,24 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
       case 'memo':
         if (S.sheet === 'memo') { S.sheet = null; render(); break; }
         S.sheet = 'memo'; S.menu = false; S.memo = S.run && S.run.memo ? S.run.memo : ''; render(); break;
-      case 'mode': S.mode = v; render(); break;
-      case 'demoScan': scanned(CODES[S.demoIdx++ % CODES.length]); break;
-      case 'closeScanner': if (S.run) { S.screen = 'running'; render(); } break;
+      /* 카메라 없이 볼 때: 싱글은 틀을 누르면 바로 인식, 멀티는 틀을 누르면 다음 데모 바코드가 잡힌 상태가 된다 */
+      case 'demoScan':
+        if (S.pmode === 'multi') { S.err = null; setLock(CODES[S.demoIdx++ % CODES.length]); }
+        else scanned(CODES[S.demoIdx++ % CODES.length]);
+        break;
+      case 'closeScanner': if (S.run) { S.screen = 'running'; resetScan(); render(); } break;
       case 'cat': tapCat(v); break;
-      case 'stop': stop(); break;
+      case 'pmode': tapMode(v); break;
+      case 'askRemove': ask('remove', +v); break;
+      case 'askStop': ask('stop'); break;
+      case 'confirmYes': answer(true); break;
+      case 'confirmNo': answer(false); break;
+      case 'fold':
+        var single = S.run && S.run.jobs && S.run.jobs.length === 1 && !S.run.multi;
+        var cur = S.open[v] !== undefined ? S.open[v] : single;
+        S.open[v] = !cur; render(); break;
+      case 'prefMode': PREF.mode = v; savePref(); if (S.screen === 'ready' && !S.basket.length) { S.pmode = v; S.lock = null; } render(); break;
+      case 'prefCenter': PREF.center = v; savePref(); if (S.screen === 'ready' && !S.basket.length) S.armed = v; render(); break;
       case 'detail': S.sheet = 'detail'; S.menu = false; render(); break;
       case 'closeSheet': S.sheet = null; render(); break;
       case 'nonprod': startRun({ cat: 'nonprod', item: v, ship: null, req: null, orders: [] }); break;
