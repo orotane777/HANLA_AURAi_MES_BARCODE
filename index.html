@@ -211,7 +211,8 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
 .jh .chev{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:transform .2s}
 .jh .chev.up{transform:rotate(180deg)}
 .jb{border-top:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--surface2)}
-.jb .kv{border-radius:14px;background:var(--surface)}
+.jmeta{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;font-size:13px;font-weight:700;color:var(--muted)}
+.jmeta b{margin-left:4px;font-size:15px;font-weight:800;color:var(--text)}
 .jb .order{background:var(--surface)}
 .ver{margin-top:auto;text-align:center;font-size:12px;color:var(--muted)}
 </style>
@@ -321,7 +322,7 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function elapsed() { return S.run ? Math.max(0, (Date.now() - S.run.start) / 1000) : 0; }
   function isScanner() { return S.screen === 'ready' || S.screen === 'rearm' || S.screen === 'success'; }
-  function more(jobs) { return jobs && jobs.length > 1 ? ' 외 ' + (jobs.length - 1) + '장' : ''; }
+  function more(jobs) { return jobs && jobs.length > 1 ? '  총 ' + jobs.length + '장' : ''; }
   function jobTitle(r) { return r.cat === 'nonprod' ? r.item : r.jobs[0].ship + '  ' + r.jobs[0].item + more(r.jobs); }
   function runTitle() { return S.run ? jobTitle(S.run) : ''; }
   function multiOn() { return S.pmode === 'multi' && isScanner(); }
@@ -345,14 +346,14 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   }
   function stop() {
     closeRun(); S.run = null; S.screen = 'ready'; S.sheet = null; S.confirm = null;
-    resetScan(); save(); toast('기록을 종료했어요');
+    resetScan(); save(); toast('기록이 종료되었습니다');
   }
   var scanT = null;
   function scanned(code) {
     if (S.screen === 'success') return;
     var job = JOBS[code];
-    if (!job) { flashErr('등록 안 된 바코드예요'); return; }
-    if (S.run && S.run.cat === S.armed && S.run.jobs && S.run.jobs.length === 1 && S.run.jobs[0].req === job.req) { S.screen = 'running'; S.lock = null; render(); toast('이미 기록 중인 작업이에요'); return; }
+    if (!job) { flashErr('등록되지 않은 바코드입니다'); return; }
+    if (S.run && S.run.cat === S.armed && S.run.jobs && S.run.jobs.length === 1 && S.run.jobs[0].req === job.req) { S.screen = 'running'; S.lock = null; render(); toast('이미 기록 중인 작업입니다'); return; }
     S.screen = 'success'; S.pending = { cat: S.armed, jobs: [job] };
     feedback(); render();
     clearTimeout(scanT);
@@ -362,10 +363,10 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   /* 멀티: 틀에 잡힌 바코드를 가운데 큰 버튼으로 담는다. 자동으로는 담지 않는다 */
   var shotT = null;
   function shutter() {
-    if (!S.lock) { flashErr('바코드를 사각틀에 맞춰 주세요'); return; }
+    if (!S.lock) { flashErr('바코드를 사각틀에 맞춰 주십시오'); return; }
     var job = JOBS[S.lock];
-    if (!job) { flashErr('등록 안 된 바코드예요'); return; }
-    if (S.basket.some(function (j) { return j.req === job.req; })) { flashErr('이미 담겨 있어요'); return; }
+    if (!job) { flashErr('등록되지 않은 바코드입니다'); return; }
+    if (S.basket.some(function (j) { return j.req === job.req; })) { flashErr('이미 추가된 요청서입니다'); return; }
     S.basket.push(job); S.err = null; S.shot = true; feedback(); render();
     var list = app.querySelector('.blist'); if (list) list.scrollTop = list.scrollHeight;
     clearTimeout(shotT);
@@ -469,7 +470,7 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     if (!stream) return;
     var track = stream.getVideoTracks()[0];
     var caps = track && track.getCapabilities ? track.getCapabilities() : {};
-    if (!caps.torch) { if (S.torch) { S.torch = false; toast('이 폰은 손전등을 켤 수 없어요'); } return; }
+    if (!caps.torch) { if (S.torch) { S.torch = false; toast('이 기기에서는 손전등을 사용할 수 없습니다'); } return; }
     track.applyConstraints({ advanced: [{ torch: !!S.torch }] }).catch(function () {});
   }
   /* 사각틀 안쪽만 잘라서 인식한다. 영상은 화면을 꽉 채우게(cover) 깔려 있으므로
@@ -542,21 +543,22 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
   }
   function guideText() {
     if (S.err) return S.err;
-    if (S.screen === 'success') return '인식됐어요';
-    if (S.shot) return '담았어요';
-    if (multiOn() && S.lock) return '버튼을 누르면 담겨요';
-    if (S.cam === 'denied') return '카메라 권한이 없어요';
-    if (S.cam === 'none') return '이 기기는 카메라를 쓸 수 없어요';
-    return '바코드를 사각틀에 맞춰 주세요';
+    if (S.screen === 'success') return '인식되었습니다';
+    if (S.shot) return '추가되었습니다';
+    if (multiOn() && S.lock) return '버튼을 누르면 추가됩니다';
+    if (S.cam === 'denied') return '카메라 권한이 없습니다';
+    if (S.cam === 'none') return '이 기기에서는 카메라를 사용할 수 없습니다';
+    return '바코드를 사각틀에 맞춰 주십시오';
   }
-  /* 상세의 요청서 카드. 머리줄은 호선+품명(넘치면 품명 쪽을 자름)과 작업지시 건수, 오른쪽에 접기 */
+  /* 상세의 요청서 카드. 머리줄은 호선+품명(넘치면 품명 쪽을 자름)·작업지시 건수·분류, 오른쪽에 접기.
+     펼치면 시작 시각과 작업지시 목록만 보인다 */
   function jobCard(j, r, single) {
     var open = S.open[j.req] !== undefined ? S.open[j.req] : single;
     var h = '<div class="jcard"><button class="jh" data-act="fold" data-v="' + esc(j.req) + '" aria-expanded="' + open + '"><span class="jt"><b>' + esc(j.ship) + '</b><span>' + esc(j.item) + '</span></span><span class="jn">' + j.orders.length + '건</span>' +
-      (single ? '<span class="jc">' + CAT[r.cat] + '</span>' : '') + '<span class="chev' + (open ? ' up' : '') + '">' + I.down + '</span></button>';
+      '<span class="jc">' + CAT[r.cat] + '</span><span class="chev' + (open ? ' up' : '') + '">' + I.down + '</span></button>';
     if (open) {
-      h += '<div class="jb"><div class="kv"><div><span>요청번호</span><span class="num">' + esc(j.req) + '</span></div><div><span>분류</span><span>' + CAT[r.cat] + '</span></div><div><span>시작</span><span class="num">' + hm(r.start) + '</span></div></div>' +
-        '<div class="orders"><div class="cap">작업지시 ' + j.orders.length + '건</div>' + j.orders.map(function (o) { return '<div class="order"><div class="l"><b>' + esc(o.item) + '</b><span class="num">' + esc(o.no) + '</span></div><span class="q num">' + esc(o.qty) + '</span></div>'; }).join('') + '</div></div>';
+      h += '<div class="jb"><div class="jmeta"><span>작업지시 ' + j.orders.length + '건</span><span>시작 <b class="num">' + hm(r.start) + '</b></span></div>' +
+        '<div class="orders">' + j.orders.map(function (o) { return '<div class="order"><div class="l"><b>' + esc(o.item) + '</b><span class="num">' + esc(o.no) + '</span></div><span class="q num">' + esc(o.qty) + '</span></div>'; }).join('') + '</div></div>';
     }
     return h + '</div>';
   }
@@ -601,11 +603,11 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     else if (S.screen === 'running') h += '<button class="cbtn' + (memoOpen ? ' ring' : '') + (S.menu ? ' dimmed' : '') + '" data-act="memo" aria-label="메모">' + (memoOpen ? I.close : I.pencil) + '</button>';
     h += '</div>';
     if (S.menu) h += '<button class="menuScrim" data-act="menu" aria-label="메뉴 닫기"></button><div class="menu">' +
-      '<button class="mi" disabled><span class="ic">' + I.user + '</span>마이페이지 <small>(구현중)</small></button>' +
-      '<button class="mi" disabled><span class="ic">' + I.dash + '</span>대시보드 <small>(구현중)</small></button>' +
+      '<button class="mi" disabled><span class="ic">' + I.user + '</span>마이페이지 <small>(준비 중)</small></button>' +
+      '<button class="mi" disabled><span class="ic">' + I.dash + '</span>대시보드 <small>(준비 중)</small></button>' +
       '<button class="mi" data-act="settings"><span class="ic">' + I.gear + '</span>설정</button></div>';
     if (S.notice === 'lunch' && S.lastJob) {
-      h += '<div class="notice"><span class="ic">' + I.clock + '</span><div class="tx"><b>점심시간에 자동 종료됐어요</b><span>' + esc(jobTitle(S.lastJob)) + '</span></div><button class="pill" data-act="resume">이어서 하기</button></div>';
+      h += '<div class="notice"><span class="ic">' + I.clock + '</span><div class="tx"><b>점심시간에 자동 종료되었습니다</b><span>' + esc(jobTitle(S.lastJob)) + '</span></div><button class="pill" data-act="resume">이어서 기록</button></div>';
     }
     h += '<div class="center' + (sc ? ' scan' : '') + (S.notice ? ' withNotice' : '') + (S.screen === 'rearm' ? ' rearm' : '') + (S.sheet === 'memo' ? ' memoMode' : '') + '">';
     if (sc) {
@@ -619,11 +621,11 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
         (ok ? '<span class="flash"></span><span class="check">' + I.check + '</span>' : '') +
         '<span class="guide' + (S.err || (!lit && (S.cam === 'denied' || S.cam === 'none')) ? ' err' : '') + '">' + esc(guideText()) + '</span></button>';
       if (S.basket.length) h += '<div class="basket above"><div class="blist">' + S.basket.map(function (j, i) {
-        return '<div class="brow"><span class="t"><b>' + esc(j.ship) + '</b><span>' + esc(j.item) + '</span></span><span class="n">' + j.orders.length + '건</span><button class="x" data-act="askRemove" data-v="' + i + '" aria-label="목록에서 빼기">' + I.x + '</button></div>';
+        return '<div class="brow"><span class="t"><b>' + esc(j.ship) + '</b><span>' + esc(j.item) + '</span></span><span class="n">' + j.orders.length + '건</span><button class="x" data-act="askRemove" data-v="' + i + '" aria-label="목록에서 삭제">' + I.x + '</button></div>';
       }).join('') + '</div></div>';
     } else if (S.screen === 'running' && S.run) {
       var r = S.run, jobs = r.jobs || [], n = jobs.length === 1 ? jobs[0].orders.length : 0;
-      var tag = jobs.length > 1 ? '외 ' + (jobs.length - 1) + '장' : (n > 1 ? n + '건' : '');
+      var tag = jobs.length > 1 ? '총 ' + jobs.length + '장' : (n > 1 ? n + '건' : '');
       h += '<div class="run"><div class="runBox"><div class="runHead"><span class="h">' + esc(r.cat === 'nonprod' ? r.item : jobs[0].ship) + '</span><span class="s">' + esc(r.cat === 'nonprod' ? '' : jobs[0].item) + '</span>' + (tag ? '<span class="chip">' + tag + '</span>' : '') + '</div><div class="timer num" data-timer>' + fmt(elapsed()) + '</div></div>' +
         '<div class="ctl"><button data-act="askStop" aria-label="종료">' + I.stop + '</button><button data-act="detail" aria-label="상세">' + I.up + '</button></div>' +
         (r.memo ? '<div class="memoLine">' + I.pencilSm + '<span>' + esc(r.memo) + '</span></div>' : '') + '</div>';
@@ -633,7 +635,7 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     if (sc) {
       var full = S.basket.length > 0;
       h += '<div class="modebar"><button class="modeBtn' + (S.pmode === 'single' ? ' sel' : '') + (full ? ' off' : '') + '" data-act="pmode" data-v="single" aria-label="싱글 모드">' + I.single + '</button>' +
-        (full ? '<button class="modeBtn go" data-act="pmode" data-v="go" aria-label="담은 ' + S.basket.length + '장 기록 시작">' + I.go + '</button>'
+        (full ? '<button class="modeBtn go" data-act="pmode" data-v="go" aria-label="' + S.basket.length + '장 기록 시작">' + I.go + '</button>'
               : '<button class="modeBtn' + (S.pmode === 'multi' ? ' sel' : '') + '" data-act="pmode" data-v="multi" aria-label="멀티 모드">' + I.multi + '</button>') + '</div>';
     }
     var side = PREF.center === 'ship' ? 'support' : 'ship';
@@ -641,15 +643,15 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
     if (S.sheet) h += sheetHtml();
     if (S.confirm) {
       var c = S.confirm, isStop = c.kind === 'stop', sub = isStop ? runTitle() : (S.basket[c.i] ? S.basket[c.i].ship + '  ' + S.basket[c.i].item : '');
-      h += '<div class="dlgWrap"><button class="scrim" data-act="confirmNo" aria-label="취소"></button><div class="dlg" role="alertdialog"><p>' + (isStop ? '작업을 종료하시겠습니까?' : '이 요청서를 목록에서 뺄까요?') + '<small>' + esc(sub) + '</small></p>' +
-        '<div class="row2"><button class="btnOut" data-act="confirmNo">취소</button><button class="btnFill" data-act="confirmYes">' + (isStop ? '종료' : '빼기') + '</button></div></div></div>';
+      h += '<div class="dlgWrap"><button class="scrim" data-act="confirmNo" aria-label="취소"></button><div class="dlg" role="alertdialog"><p>' + (isStop ? '작업을 종료하시겠습니까?' : '이 요청서를 목록에서 삭제하시겠습니까?') + '<small>' + esc(sub) + '</small></p>' +
+        '<div class="row2"><button class="btnOut" data-act="confirmNo">취소</button><button class="btnFill" data-act="confirmYes">' + (isStop ? '종료' : '삭제') + '</button></div></div></div>';
     }
     if (S.page === 'settings') {
       var opt = function (act, v, on, sw, label) { return '<button class="themeOpt' + (on ? ' sel' : '') + '" data-act="' + act + '" data-v="' + v + '"><span class="sw">' + sw + '</span>' + label + '<span class="radio"></span></button>'; };
       h += '<div class="page"><div class="pageHead"><button class="cbtn" data-act="closePage" aria-label="뒤로">' + I.back + '</button><h2>설정</h2></div>' +
-        '<div class="sec"><div class="lb">처음 열 때 촬영 방식</div>' +
-        opt('prefMode', 'single', PREF.mode === 'single', I.single, '싱글 (한 장씩 자동)') +
-        opt('prefMode', 'multi', PREF.mode === 'multi', I.multi, '멀티 (여러 장 담기)') +
+        '<div class="sec"><div class="lb">기본 촬영 방식</div>' +
+        opt('prefMode', 'single', PREF.mode === 'single', I.single, '싱글 (한 장씩 자동 인식)') +
+        opt('prefMode', 'multi', PREF.mode === 'multi', I.multi, '멀티 (여러 장 일괄 기록)') +
         '</div><div class="sec"><div class="lb">가운데 버튼</div>' +
         opt('prefCenter', 'ship', PREF.center === 'ship', I.ship, '호선작업') +
         opt('prefCenter', 'support', PREF.center === 'support', I.support, '생산지원') +
@@ -735,7 +737,7 @@ textarea{height:96px;resize:none;padding:14px;border-radius:18px;border:1px soli
           app.querySelectorAll('.chips button').forEach(function (cb) { cb.classList.toggle('sel', cb.dataset.v === v); });
         } else render();
         break;
-      case 'saveMemo': if (document.activeElement) document.activeElement.blur(); if (S.run) { S.run.memo = S.memo.trim(); save(); } S.sheet = null; toast('메모를 저장했어요'); break;
+      case 'saveMemo': if (document.activeElement) document.activeElement.blur(); if (S.run) { S.run.memo = S.memo.trim(); save(); } S.sheet = null; toast('메모가 저장되었습니다'); break;
       case 'resume': if (S.lastJob) startRun(S.lastJob); break;
     }
   });
